@@ -1,0 +1,22 @@
+{
+  "description.everlastingwinter": "Forces continuous snowfall and allows snow layers to accumulate.",
+
+  "text.autoconfig.everlastingwinter.title": "Everlasting Winter",
+
+  "text.autoconfig.everlastingwinter.option.constantSnowfall": "Constant Snowfall",
+  "text.autoconfig.everlastingwinter.option.constantSnowfall.@Tooltip": "Enables constant snowfall in the specified biomes.",
+  "text.autoconfig.everlastingwinter.option.layerDepth": "Snow Layer Limit",
+  "text.autoconfig.everlastingwinter.option.layerDepth.@Tooltip": "Max snow height per stack (1–8). If set to 8, it converts to a full snow block and keeps stacking upward. Values under 8 cap the snow stack at that height.",
+  "text.autoconfig.everlastingwinter.option.snowTickChance": "Snow Tick Chance (%)",
+  "text.autoconfig.everlastingwinter.option.snowTickChance.@Tooltip": "Chance per tick for a chunk to place or stack a snow layer.",
+  "text.autoconfig.everlastingwinter.option.shouldReplaceFlowersAndGrass": "Replace Short Grass & Flowers",
+  "text.autoconfig.everlastingwinter.option.shouldReplaceFlowersAndGrass.@Tooltip": "Replaces short grass and small flowers with snow layers as snow falls.",
+  "text.autoconfig.everlastingwinter.option.replaceSmallMushrooms": "Replace Small Mushrooms",
+  "text.autoconfig.everlastingwinter.option.replaceSmallMushrooms.@Tooltip": "Replaces red and brown mushrooms on the ground with snow layers.",
+  "text.autoconfig.everlastingwinter.option.replaceTallFlowers": "Replace Tall Plants",
+  "text.autoconfig.everlastingwinter.option.replaceTallFlowers.@Tooltip": "Replaces tall flowers, sunflowers, and other double-tall plants with snow layers.",
+  "text.autoconfig.everlastingwinter.option.biomeTemperature": "Biome Temperature",
+  "text.autoconfig.everlastingwinter.option.biomeTemperature.@Tooltip": "Sets the temperature for the specified biomes. Lower values enable snowfall in otherwise warmer areas.",
+  "text.autoconfig.everlastingwinter.option.listOfSnowBiomes": "Snow Biomes",
+  "text.autoconfig.everlastingwinter.option.listOfSnowBiomes.@Tooltip": "List of biome IDs where snowfall is enabled."
+}

@@ -1,0 +1,40 @@
+{
+	"schemaVersion": 1,
+	"id": "${mod_id}",
+	"version": "${version}",
+	"name": "${mod_name}",
+	"description": "Creates constant snowfall in the listed biomes.",
+	"authors": [
+		"Pete MC Mods, mcmods.pete@gmail.com"
+	],
+	"contact": {
+		"homepage": "https://modrinth.com/mod/",
+		"sources": "https://github.com/MC-Mods-Pete/",
+		"issues": "https://github.com/MC-Mods-Pete/"
+	},
+	"license": "All rights reserved",
+	"icon": "icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.petemc.everlastingwinter.EverlastingWinter"
+		],
+		"modmenu": [
+			"net.petemc.everlastingwinter.util.ModMenuIntegration"
+		]
+	},
+	"mixins": [
+		"everlastingwinter.mixins.json"
+	],
+	"depends": {
+		"fabricloader": "${fabric_version_range}",
+		"minecraft": "${mc_version_range}",
+		"java": "${java_version_range}",
+		"fabric-api": "*",
+		"cloth-config": ">=${cloth_config_version}"
+	},
+	"suggests": {
+		"modmenu": ">=${modmenu_version}",
+		"another-mod": "*"
+	}
+}

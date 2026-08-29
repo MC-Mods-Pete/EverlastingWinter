@@ -1,0 +1,22 @@
+{
+  "description.everlastingwinter": "Erzwingt dauerhaften Schneefall und lässt den Schnee schichtweise anwachsen.",
+
+  "text.autoconfig.everlastingwinter.title": "Everlasting Winter",
+
+  "text.autoconfig.everlastingwinter.option.constantSnowfall": "Dauerhafter Schneefall",
+  "text.autoconfig.everlastingwinter.option.constantSnowfall.@Tooltip": "Lässt es in kalten Biomen durchgehend schneien – auch bei klarem Himmel.",
+  "text.autoconfig.everlastingwinter.option.layerDepth": "Max. Schneehöhe",
+  "text.autoconfig.everlastingwinter.option.layerDepth.@Tooltip": "Maximale Stapelhöhe an Schneeschichten (1–8). Bei 8 entsteht ein voller Schneeblock, auf dem dann weiter nach oben gestapelt werden. Werte unter 8 begrenzen die Höhe.",
+  "text.autoconfig.everlastingwinter.option.snowTickChance": "Schnee-Wahrscheinlichkeit (%)",
+  "text.autoconfig.everlastingwinter.option.snowTickChance.@Tooltip": "Chance pro Tick, dass im Chunk Schnee fällt oder anwächst. Höhere Werte bedeuten schnelleren Schnee, kosten aber mehr Performance.",
+  "text.autoconfig.everlastingwinter.option.shouldReplaceFlowersAndGrass": "Gras & Blumen überschreiben",
+  "text.autoconfig.everlastingwinter.option.shouldReplaceFlowersAndGrass.@Tooltip": "Ersetzt kurzes Gras und kleine Blumen bei Schneefall direkt durch Schnee.",
+  "text.autoconfig.everlastingwinter.option.replaceSmallMushrooms": "Kleine Pilze überschreiben",
+  "text.autoconfig.everlastingwinter.option.replaceSmallMushrooms.@Tooltip": "Ersetzt rote und braune Pilze bei Schneefall durch Schnee.",
+  "text.autoconfig.everlastingwinter.option.replaceTallFlowers": "Hohe Pflanzen überschreiben",
+  "text.autoconfig.everlastingwinter.option.replaceTallFlowers.@Tooltip": "Ersetzt hohe Blumen, Rosenbüsche und andere zweigliedrige Pflanzen bei Schneefall durch Schnee.",
+  "text.autoconfig.everlastingwinter.option.biomeTemperature": "Biom-Temperatur",
+  "text.autoconfig.everlastingwinter.option.biomeTemperature.@Tooltip": "Legt die Temperatur für die angegebenen Biome fest. Niedrigere Werte ermöglichen Schneefall in sonst wärmeren Gebieten.",
+  "text.autoconfig.everlastingwinter.option.listOfSnowBiomes": "Schnee-Biome",
+  "text.autoconfig.everlastingwinter.option.listOfSnowBiomes.@Tooltip": "Liste von Biom-IDs, in denen Schnee fallen darf."
+}
