@@ -108,7 +108,9 @@ public abstract class ServerWorldMixin {
 						if (currentLayers < 8) {
 							world.setBlockState(blockPos, Blocks.SNOW.getDefaultState().with(SnowBlock.LAYERS, currentLayers + 1));
 						} else {
-							if (MainConfig.isEnablePowderSnow() && world.random.nextInt(100) < MainConfig.getPowderSnowChance()) {
+							if (MainConfig.isEnablePowderSnow() && world.random.nextInt(100) < MainConfig.getPowderSnowChance()
+								&& !world.getBlockState(blockPos.down()).isIn(BlockTags.LEAVES)
+								&& !world.getBlockState(blockPos.down()).isIn(BlockTags.LOGS)) {
 								world.setBlockState(blockPos, Blocks.POWDER_SNOW.getDefaultState());
 							} else {
 								world.setBlockState(blockPos, Blocks.SNOW_BLOCK.getDefaultState());
@@ -146,27 +148,30 @@ public abstract class ServerWorldMixin {
 		BlockPos motionBlocking = world.getTopPosition(Heightmap.Type.MOTION_BLOCKING, samplePos);
 		BlockPos noLeaves = world.getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, samplePos);
 
-		// No tree overhead — use simple position
+		// No tree overhead — use simple position.
 		if (motionBlocking.equals(noLeaves)) {
 			return motionBlocking;
 		}
 
-		// Tree overhead: 50/50 whether snow lands on top of leaves or searches below
-		if (world.getRandom().nextBoolean()) {
-			return motionBlocking;
+		// Canopy/leaf surface: use MOTION_BLOCKING which points to the air above the leaves,
+		// where snow can stack normally.
+		// 50% of the time use the canopy surface, 50% search below for ground/branch.
+		if (world.getBlockState(noLeaves).isIn(BlockTags.LEAVES)) {
+			if (world.getRandom().nextBoolean()) {
+				return motionBlocking;
+			}
 		}
 
-		// Search downward from the no-leaves candidate for the ground under the canopy.
-		// Special case for branchy trees (e.g. Acacia): when we encounter a log that has
-		// air above it, give it a 10% chance to catch snow. Otherwise keep descending.
+		// Prefer the real ground under the canopy instead of the branch itself.
+		// A branch is only used as a low-probability fallback when no valid ground is found
+		// within a short downward search and the branch has air above it.
 		BlockPos p = noLeaves;
 		BlockState prev = world.getBlockState(p.up());
 		for (int depth = 0; depth < 20 && p.getY() > world.getBottomY(); depth++) {
 			BlockState cur = world.getBlockState(p);
 
 			if (cur.isIn(BlockTags.LOGS)) {
-				// 10% chance to place snow on this branch, but only if air is above it
-				if (prev.isAir() && world.getRandom().nextInt(100) < 10) {
+				if (prev.isAir() && branchFallbackChance(world, p)) {
 					return p.up();
 				}
 			} else if (!cur.isIn(BlockTags.LEAVES) && !cur.isAir()
@@ -174,7 +179,6 @@ public abstract class ServerWorldMixin {
 					&& !cur.isReplaceable()
 					&& !cur.isIn(BlockTags.SMALL_FLOWERS)
 					&& !cur.isIn(BlockTags.TALL_FLOWERS)) {
-				// Solid non-tree, non-powder-snow ground found — place snow on top
 				return p.up();
 			}
 
@@ -182,8 +186,22 @@ public abstract class ServerWorldMixin {
 			p = p.down();
 		}
 
-		// Nothing found — fall back to the no-leaves candidate
+		if (world.getBlockState(noLeaves).isOf(Blocks.POWDER_SNOW)) {
+			return null;
+		}
 		return noLeaves;
+	}
+
+	@Unique
+	private static boolean branchFallbackChance(World world, BlockPos pos) {
+		long hash = 0x9E3779B97F4A7C15L * pos.getX()
+				+ 0xBF58476D1CE4E5B9L * pos.getY()
+				+ 0x94D049BB133111EBL * pos.getZ();
+		hash ^= hash >>> 32;
+		hash *= 0x27D4EB2F165667C5L;
+		hash ^= hash >>> 32;
+		long bucket = Math.floorMod(hash, 100L);
+		return bucket < 30L;
 	}
 
 	@Unique
