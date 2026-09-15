@@ -5,8 +5,8 @@
 
   "text.autoconfig.everlastingwinter.option.constantSnowfall": "Constant Snowfall",
   "text.autoconfig.everlastingwinter.option.constantSnowfall.@Tooltip": "Enables constant snowfall in the specified biomes.",
-  "text.autoconfig.everlastingwinter.option.layerDepth": "Snow Layer Limit",
-  "text.autoconfig.everlastingwinter.option.layerDepth.@Tooltip": "Max snow height per stack (1–8). If set to 8, it converts to a full snow block and keeps stacking upward. Values under 8 cap the snow stack at that height.",
+  "text.autoconfig.everlastingwinter.option.layerDepth": "Snow Height Limit",
+  "text.autoconfig.everlastingwinter.option.layerDepth.@Tooltip": "Maximum total snow height in eighth-blocks above existing blocks (1 layer = 1, 1 snow block = 8). Example: 12 = up to 1 snow block + 4 layers. Existing blocks are never replaced.",
   "text.autoconfig.everlastingwinter.option.snowTickChance": "Snow Tick Chance (%)",
   "text.autoconfig.everlastingwinter.option.snowTickChance.@Tooltip": "Chance per tick for a chunk to place or stack a snow layer.",
   "text.autoconfig.everlastingwinter.option.shouldReplaceFlowersAndGrass": "Replace Short Grass & Flowers",
@@ -18,5 +18,15 @@
   "text.autoconfig.everlastingwinter.option.biomeTemperature": "Biome Temperature",
   "text.autoconfig.everlastingwinter.option.biomeTemperature.@Tooltip": "Sets the temperature for the specified biomes. Lower values enable snowfall in otherwise warmer areas.",
   "text.autoconfig.everlastingwinter.option.listOfSnowBiomes": "Snow Biomes",
-  "text.autoconfig.everlastingwinter.option.listOfSnowBiomes.@Tooltip": "List of biome IDs where snowfall is enabled."
+  "text.autoconfig.everlastingwinter.option.listOfSnowBiomes.@Tooltip": "List of biome IDs where snowfall is enabled.",
+  "text.autoconfig.everlastingwinter.option.breakCropsAndFarmland": "Break Crops & Farmland",
+  "text.autoconfig.everlastingwinter.option.breakCropsAndFarmland.@Tooltip": "Removes growing crops and turns the farmland below into dirt, so snow can accumulate in crop fields.",
+  "text.autoconfig.everlastingwinter.option.replacePaths": "Replace Dirt Paths",
+  "text.autoconfig.everlastingwinter.option.replacePaths.@Tooltip": "Replaces dirt paths with dirt when snow falls, so snow can remain on paths instead of sliding off.",
+  "text.autoconfig.everlastingwinter.option.replaceTorches": "Replace Torches",
+  "text.autoconfig.everlastingwinter.option.replaceTorches.@Tooltip": "Removes torches on the ground (the item drops so you can pick it back up) and replaces them with snow layers.",
+  "text.autoconfig.everlastingwinter.option.enablePowderSnow": "Enable Powder Snow",
+  "text.autoconfig.everlastingwinter.option.enablePowderSnow.@Tooltip": "Enables snow layers turning into powder snow.",
+  "text.autoconfig.everlastingwinter.option.powderSnowChance": "Powder Snow Chance (%)",
+  "text.autoconfig.everlastingwinter.option.powderSnowChance.@Tooltip": "Chance (in percent) that a snow layer turns into powder snow."
 }

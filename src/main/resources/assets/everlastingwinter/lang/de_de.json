@@ -6,7 +6,7 @@
   "text.autoconfig.everlastingwinter.option.constantSnowfall": "Dauerhafter Schneefall",
   "text.autoconfig.everlastingwinter.option.constantSnowfall.@Tooltip": "Lässt es in kalten Biomen durchgehend schneien – auch bei klarem Himmel.",
   "text.autoconfig.everlastingwinter.option.layerDepth": "Max. Schneehöhe",
-  "text.autoconfig.everlastingwinter.option.layerDepth.@Tooltip": "Maximale Stapelhöhe an Schneeschichten (1–8). Bei 8 entsteht ein voller Schneeblock, auf dem dann weiter nach oben gestapelt werden. Werte unter 8 begrenzen die Höhe.",
+  "text.autoconfig.everlastingwinter.option.layerDepth.@Tooltip": "Maximale Gesamtschneehöhe in Achtel-Blöcken über vorhandenen Blöcken (1 Lage = 1, 1 Schneeblock = 8). Beispiel: 12 = bis zu 1 Schneeblock + 4 Lagen. Vorhandene Blöcke werden nie ersetzt.",
   "text.autoconfig.everlastingwinter.option.snowTickChance": "Schnee-Wahrscheinlichkeit (%)",
   "text.autoconfig.everlastingwinter.option.snowTickChance.@Tooltip": "Chance pro Tick, dass im Chunk Schnee fällt oder anwächst. Höhere Werte bedeuten schnelleren Schnee, kosten aber mehr Performance.",
   "text.autoconfig.everlastingwinter.option.shouldReplaceFlowersAndGrass": "Gras & Blumen überschreiben",
@@ -18,5 +18,15 @@
   "text.autoconfig.everlastingwinter.option.biomeTemperature": "Biom-Temperatur",
   "text.autoconfig.everlastingwinter.option.biomeTemperature.@Tooltip": "Legt die Temperatur für die angegebenen Biome fest. Niedrigere Werte ermöglichen Schneefall in sonst wärmeren Gebieten.",
   "text.autoconfig.everlastingwinter.option.listOfSnowBiomes": "Schnee-Biome",
-  "text.autoconfig.everlastingwinter.option.listOfSnowBiomes.@Tooltip": "Liste von Biom-IDs, in denen Schnee fallen darf."
+  "text.autoconfig.everlastingwinter.option.listOfSnowBiomes.@Tooltip": "Liste von Biom-IDs, in denen Schnee fallen darf.",
+  "text.autoconfig.everlastingwinter.option.breakCropsAndFarmland": "Pflanzen & Ackerboden entfernen",
+  "text.autoconfig.everlastingwinter.option.breakCropsAndFarmland.@Tooltip": "Entfernt wachsende Pflanzen und verwandelt den Ackerboden darunter in Erde, damit sich auf Feldern Schnee ablagern kann.",
+  "text.autoconfig.everlastingwinter.option.replacePaths": "Wege ersetzen",
+  "text.autoconfig.everlastingwinter.option.replacePaths.@Tooltip": "Ersetzt Wege (Erdpfade) bei Schneefall durch Erde, damit Schnee auf Wegen liegen bleibt, statt abzurutschen.",
+  "text.autoconfig.everlastingwinter.option.replaceTorches": "Fackeln ersetzen",
+  "text.autoconfig.everlastingwinter.option.replaceTorches.@Tooltip": "Entfernt Fackeln am Boden (das Item fällt drop als Gegenstand, damit du es einsammeln kannst) und ersetzt sie durch Schneelagen.",
+  "text.autoconfig.everlastingwinter.option.enablePowderSnow": "Pulverschnee aktivieren",
+  "text.autoconfig.everlastingwinter.option.enablePowderSnow.@Tooltip": "Aktiviert das Umwandeln von Schneelagen in Pulverschnee.",
+  "text.autoconfig.everlastingwinter.option.powderSnowChance": "Pulverschnee-Wahrscheinlichkeit (%)",
+  "text.autoconfig.everlastingwinter.option.powderSnowChance.@Tooltip": "Chance in Prozent, dass eine Schneelage in Pulverschnee umgewandelt wird."
 }

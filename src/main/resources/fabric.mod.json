@@ -8,9 +8,9 @@
 		"Pete MC Mods, mcmods.pete@gmail.com"
 	],
 	"contact": {
-		"homepage": "https://modrinth.com/mod/",
-		"sources": "https://github.com/MC-Mods-Pete/",
-		"issues": "https://github.com/MC-Mods-Pete/"
+		"homepage": "https://www.curseforge.com/minecraft/mc-mods/everlasting-winter",
+		"sources": "https://github.com/MC-Mods-Pete/EverlastingWinter",
+		"issues": "https://github.com/MC-Mods-Pete/EverlastingWinter/issues"
 	},
 	"license": "All rights reserved",
 	"icon": "icon.png",

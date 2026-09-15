@@ -12,32 +12,109 @@ import net.petemc.everlastingwinter.EverlastingWinter;
 public class MainConfig implements ConfigData {
 
     public static boolean isConstantSnowfall() {
-        return INSTANCE.constantSnowfall;
+        Boolean o = RuntimeOverrides.getBoolean("constantSnowfall");
+        return o != null ? o : INSTANCE.constantSnowfall;
     }
 
     public static boolean isReplaceSmallMushrooms() {
-        return INSTANCE.replaceSmallMushrooms;
+        Boolean o = RuntimeOverrides.getBoolean("replaceSmallMushrooms");
+        return o != null ? o : INSTANCE.replaceSmallMushrooms;
     }
 
     public static boolean isReplaceTallFlowers() {
-        return INSTANCE.replaceTallFlowers;
+        Boolean o = RuntimeOverrides.getBoolean("replaceTallFlowers");
+        return o != null ? o : INSTANCE.replaceTallFlowers;
     }
 
     public static int getLayerDepth() {
-        return INSTANCE.layerDepth;
+        Integer o = RuntimeOverrides.getInt("layerDepth");
+        return o != null ? Math.max(1, o) : INSTANCE.layerDepth;
     }
 
     public static int getSnowTickChance() {
-        return INSTANCE.snowTickChance;
+        Integer o = RuntimeOverrides.getInt("snowTickChance");
+        return o != null ? o : INSTANCE.snowTickChance;
+    }
+
+    public static boolean isEnablePowderSnow() {
+        Boolean o = RuntimeOverrides.getBoolean("enablePowderSnow");
+        return o != null ? o : INSTANCE.enablePowderSnow;
+    }
+
+    public static int getPowderSnowChance() {
+        Integer o = RuntimeOverrides.getInt("powderSnowChance");
+        return o != null ? Math.max(0, Math.min(100, o)) : INSTANCE.powderSnowChance;
     }
 
     public static boolean isShouldReplaceFlowersAndGrass() {
-        return INSTANCE.shouldReplaceFlowersAndGrass;
+        Boolean o = RuntimeOverrides.getBoolean("shouldReplaceFlowersAndGrass");
+        return o != null ? o : INSTANCE.shouldReplaceFlowersAndGrass;
+    }
+
+    public static boolean isBreakCropsAndFarmland() {
+        Boolean o = RuntimeOverrides.getBoolean("breakCropsAndFarmland");
+        return o != null ? o : INSTANCE.breakCropsAndFarmland;
+    }
+
+    public static boolean isReplacePaths() {
+        Boolean o = RuntimeOverrides.getBoolean("replacePaths");
+        return o != null ? o : INSTANCE.replacePaths;
+    }
+
+    public static boolean isReplaceTorches() {
+        Boolean o = RuntimeOverrides.getBoolean("replaceTorches");
+        return o != null ? o : INSTANCE.replaceTorches;
     }
 
     public static float getBiomeTemperature() {
         return INSTANCE.biomeTemperature;
     }
+
+    static boolean rawConstantSnowfall() {
+        return INSTANCE.constantSnowfall;
+    }
+
+    static int rawLayerDepth() {
+        return INSTANCE.layerDepth;
+    }
+
+    static int rawSnowTickChance() {
+        return INSTANCE.snowTickChance;
+    }
+
+    static boolean rawShouldReplaceFlowersAndGrass() {
+        return INSTANCE.shouldReplaceFlowersAndGrass;
+    }
+
+    static boolean rawReplaceSmallMushrooms() {
+        return INSTANCE.replaceSmallMushrooms;
+    }
+
+    static boolean rawReplaceTallFlowers() {
+        return INSTANCE.replaceTallFlowers;
+    }
+
+    static boolean rawBreakCropsAndFarmland() {
+        return INSTANCE.breakCropsAndFarmland;
+    }
+
+    static boolean rawReplacePaths() {
+        return INSTANCE.replacePaths;
+    }
+
+    static boolean rawReplaceTorches() {
+        return INSTANCE.replaceTorches;
+    }
+
+    static boolean rawEnablePowderSnow() {
+        return INSTANCE.enablePowderSnow;
+    }
+
+    static int rawPowderSnowChance() {
+        return INSTANCE.powderSnowChance;
+    }
+
+
 
     public static String[] getListOfSnowBiomes() {
         return INSTANCE.listOfSnowBiomes;
@@ -56,8 +133,8 @@ public class MainConfig implements ConfigData {
     private boolean constantSnowfall = true;
 
     @ConfigEntry.Gui.Tooltip()
-    @Comment("The depth of the snow layers (1-8) | default: 4")
-    private int layerDepth = 4;
+    @Comment("Maximum total snow height in eighth-blocks above non-snow blocks (1 layer = 1, 1 snow block = 8 layers). Snow blocks stack upward, existing blocks are never replaced | default: 12 | min: 1")
+    private int layerDepth = 12;
 
     @ConfigEntry.Gui.Tooltip()
     @Comment("Chance (in percent) that a snow tick happens for a chunk each game tick | default: 3")
@@ -78,6 +155,26 @@ public class MainConfig implements ConfigData {
     @ConfigEntry.Gui.Tooltip()
     @Comment("The temperature of the biome | default: -1.0")
     private float biomeTemperature = -1.0f;
+
+    @ConfigEntry.Gui.Tooltip()
+    @Comment("If true, crops are removed and farmland is turned into dirt so snow can accumulate | default: true")
+    private boolean breakCropsAndFarmland = true;
+
+    @ConfigEntry.Gui.Tooltip()
+    @Comment("If true, dirt paths are replaced with dirt so that snow can accumulate on them | default: true")
+    private boolean replacePaths = true;
+
+    @ConfigEntry.Gui.Tooltip()
+    @Comment("If true, torches on the ground are removed (item drops) and replaced with snow layers | default: false")
+    private boolean replaceTorches = false;
+
+    @ConfigEntry.Gui.Tooltip()
+    @Comment("If true, snow layers can turn into powder snow | default: false")
+    private boolean enablePowderSnow = false;
+
+    @ConfigEntry.Gui.Tooltip()
+    @Comment("Chance (in percent) that a snow layer turns into powder snow | default: 10 | min: 0 | max: 100")
+    private int powderSnowChance = 10;
 
     @ConfigEntry.Gui.Tooltip()
     @Comment("A list with all the biomes that should get snow layers")
