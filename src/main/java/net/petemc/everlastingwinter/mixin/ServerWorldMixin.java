@@ -32,7 +32,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.WorldChunk;
-import net.petemc.everlastingwinter.EverlastingWinter;
 import net.petemc.everlastingwinter.config.MainConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -41,34 +40,42 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.function.BooleanSupplier;
+
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin {
 	@Shadow
 	public abstract void setWeather(int clearDuration, int rainDuration, boolean raining, boolean thundering);
 
 	@Unique
-    private int counter = 0;
+	private boolean lastMainConfigValue = false;
 
 	@Unique
-    private boolean lastMainConfigValue = false;
+	private int weatherTimer = 0;
+
+	// Runs once per world tick — keeps weather permanently in sync with the config.
+	@Inject(at = {@At("HEAD")}, method = {"tick"})
+	private void tick(BooleanSupplier shouldKeepTicking, CallbackInfo info) {
+		ServerWorld serverWorld = (ServerWorld)(Object)this;
+		if (lastMainConfigValue != MainConfig.isConstantSnowfall()) {
+			lastMainConfigValue = MainConfig.isConstantSnowfall();
+			if (!lastMainConfigValue) {
+				this.setWeather((ServerWorld.CLEAR_WEATHER_DURATION_PROVIDER).get(((World) serverWorld).getRandom()), 0, false, false);
+				weatherTimer = 0;
+			}
+		}
+		if (weatherTimer <= 0) {
+			this.setWeather(0, 7000, MainConfig.isConstantSnowfall(), false);
+			weatherTimer = 6000;
+		} else {
+			weatherTimer--;
+		}
+	}
 
 	@Inject(at = {@At("HEAD")}, method = {"tickChunk"})
 	private void tickChunk(WorldChunk chunk, int randomTickSpeed, CallbackInfo info) {
 		ServerWorld serverWorld = (ServerWorld)(Object)this;
 		chunkSnowTick(serverWorld, chunk);
-		if (lastMainConfigValue != MainConfig.isConstantSnowfall()) {
-			lastMainConfigValue = MainConfig.isConstantSnowfall();
-			if (!lastMainConfigValue) {
-				this.setWeather((ServerWorld.CLEAR_WEATHER_DURATION_PROVIDER).get(((World) serverWorld).getRandom()), 0, false, false);
-				counter = 0;
-			}
-		}
-		if (counter == 6000) {
-			this.setWeather(0, 7000, MainConfig.isConstantSnowfall(), false);
-			counter = 0;
-		} else {
-			counter++;
-		}
 	}
 
 	@Unique

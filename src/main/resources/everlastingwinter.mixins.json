@@ -3,7 +3,8 @@
 	"package": "net.petemc.everlastingwinter.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
-		"ServerWorldMixin"
+		"ServerWorldMixin",
+		"WorldMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
