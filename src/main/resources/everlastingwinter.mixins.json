@@ -1,8 +1,11 @@
 {
 	"required": true,
+	"minVersion": "0.7",
 	"package": "net.petemc.everlastingwinter.mixin",
 	"compatibilityLevel": "JAVA_17",
+	"refmap": "everlastingwinter.mixins-refmap.json",
 	"mixins": [
+		"BiomeMixin",
 		"ServerWorldMixin",
 		"WorldMixin"
 	],

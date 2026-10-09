@@ -7,9 +7,9 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 import net.petemc.everlastingwinter.EverlastingWinter;
 import net.petemc.everlastingwinter.config.MainConfig;
 import net.petemc.everlastingwinter.config.RuntimeOverrides;
@@ -18,34 +18,34 @@ import java.util.concurrent.CompletableFuture;
 
 public class EverlastingWinterCommand {
 
-	public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-		LiteralArgumentBuilder<ServerCommandSource> root = LiteralArgumentBuilder.<ServerCommandSource>literal("everlastingwinter");
+	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+		LiteralArgumentBuilder<CommandSourceStack> root = LiteralArgumentBuilder.<CommandSourceStack>literal("everlastingwinter");
 
-		root.then(LiteralArgumentBuilder.<ServerCommandSource>literal("status").executes(EverlastingWinterCommand::status));
+		root.then(LiteralArgumentBuilder.<CommandSourceStack>literal("status").executes(EverlastingWinterCommand::status));
 
 		root.then(RequiredArgumentBuilder
-				.<ServerCommandSource, String>argument("option", StringArgumentType.word())
+				.<CommandSourceStack, String>argument("option", StringArgumentType.word())
 				.suggests(EverlastingWinterCommand::suggestOptions)
 				.then(RequiredArgumentBuilder
-						.<ServerCommandSource, String>argument("value", StringArgumentType.word())
+						.<CommandSourceStack, String>argument("value", StringArgumentType.word())
 						.executes(EverlastingWinterCommand::setGeneric)));
 
-		root.then(LiteralArgumentBuilder.<ServerCommandSource>literal("reset").executes(EverlastingWinterCommand::resetAll));
+		root.then(LiteralArgumentBuilder.<CommandSourceStack>literal("reset").executes(EverlastingWinterCommand::resetAll));
 
 		dispatcher.register(root);
 	}
 
-	private static void fail(ServerCommandSource source, String msg) {
-		source.sendFeedback(() -> Text.literal(msg).formatted(Formatting.RED), false);
+	private static void fail(CommandSourceStack source, String msg) {
+		source.sendSuccess(() -> Component.literal(msg).withStyle(ChatFormatting.RED), false);
 	}
 
-	private static void ok(ServerCommandSource source, String msg) {
-		source.sendFeedback(() -> Text.literal(msg).formatted(Formatting.GREEN), false);
+	private static void ok(CommandSourceStack source, String msg) {
+		source.sendSuccess(() -> Component.literal(msg).withStyle(ChatFormatting.GREEN), false);
 	}
 
-	private static int status(CommandContext<ServerCommandSource> ctx) {
-		ServerCommandSource source = ctx.getSource();
-		source.sendFeedback(() -> Text.literal("=== " + EverlastingWinter.MOD_NAME + " runtime state ==="), false);
+	private static int status(CommandContext<CommandSourceStack> ctx) {
+		CommandSourceStack source = ctx.getSource();
+		source.sendSuccess(() -> Component.literal("=== " + EverlastingWinter.MOD_NAME + " runtime state ==="), false);
 		for (String name : RuntimeOverrides.knownNames()) {
 			Object cur = RuntimeOverrides.currentValue(name);
 			String suffix = "";
@@ -53,16 +53,16 @@ public class EverlastingWinterCommand {
 				suffix = " (config: " + RuntimeOverrides.format(RuntimeOverrides.defaultValue(name)) + ")";
 			}
 			String line = "  " + name + " = " + RuntimeOverrides.format(cur) + suffix;
-			source.sendFeedback(() -> Text.literal(line), false);
+			source.sendSuccess(() -> Component.literal(line), false);
 		}
-		String[] biomes = MainConfig.getListOfSnowBiomes();
-		String biomeLine = "  listOfSnowBiomes = " + (biomes == null ? 0 : biomes.length) + " biomes (read-only, edit the config file)";
-		source.sendFeedback(() -> Text.literal(biomeLine), false);
+		var biomes = MainConfig.getListOfSnowBiomes();
+		String biomeLine = "  listOfSnowBiomes = " + (biomes == null ? 0 : biomes.size()) + " biomes (read-only, edit the config file)";
+		source.sendSuccess(() -> Component.literal(biomeLine), false);
 		return 1;
 	}
 
-	private static int setGeneric(CommandContext<ServerCommandSource> ctx) {
-		ServerCommandSource source = ctx.getSource();
+	private static int setGeneric(CommandContext<CommandSourceStack> ctx) {
+		CommandSourceStack source = ctx.getSource();
 		String option = StringArgumentType.getString(ctx, "option");
 		String value = StringArgumentType.getString(ctx, "value");
 
@@ -86,13 +86,13 @@ public class EverlastingWinterCommand {
 		}
 	}
 
-	private static int resetAll(CommandContext<ServerCommandSource> ctx) {
+	private static int resetAll(CommandContext<CommandSourceStack> ctx) {
 		RuntimeOverrides.resetAll();
-		ctx.getSource().sendFeedback(() -> Text.literal(EverlastingWinter.MOD_NAME + ": all runtime overrides cleared (back to config-file values)."), false);
+		ctx.getSource().sendSuccess(() -> Component.literal(EverlastingWinter.MOD_NAME + ": all runtime overrides cleared (back to config-file values)."), false);
 		return 1;
 	}
 
-	private static CompletableFuture<Suggestions> suggestOptions(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+	private static CompletableFuture<Suggestions> suggestOptions(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder) {
 		for (String n : RuntimeOverrides.knownNames()) {
 			builder.suggest(n);
 		}
