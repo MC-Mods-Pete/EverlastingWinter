@@ -59,9 +59,9 @@ public abstract class ServerWorldMixin {
 		ServerWorld serverWorld = (ServerWorld)(Object)this;
 		if (lastMainConfigValue != MainConfig.isConstantSnowfall()) {
 			lastMainConfigValue = MainConfig.isConstantSnowfall();
+			weatherTimer = 0;
 			if (!lastMainConfigValue) {
 				this.setWeather((ServerWorld.CLEAR_WEATHER_DURATION_PROVIDER).get(((World) serverWorld).getRandom()), 0, false, false);
-				weatherTimer = 0;
 			}
 		}
 		if (weatherTimer <= 0) {
