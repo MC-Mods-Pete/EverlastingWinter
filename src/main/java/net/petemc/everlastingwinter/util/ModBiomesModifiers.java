@@ -12,7 +12,7 @@ import net.petemc.everlastingwinter.config.MainConfig;
 public class ModBiomesModifiers {
     public static void load() {
         String[] snowBiomes = MainConfig.getListOfSnowBiomes();
-        BiomeModifications.create(new Identifier(EverlastingWinter.MOD_ID, "biome_modifications"))
+        BiomeModifications.create(Identifier.of(EverlastingWinter.MOD_ID, "biome_modifications"))
                 .add(ModificationPhase.POST_PROCESSING,
                         BiomeSelectors.foundInOverworld().and(context ->
                                 Arrays.stream(snowBiomes).anyMatch(s -> s.equalsIgnoreCase(context.getBiomeKey().getValue().toString()))),
