@@ -1,9 +1,11 @@
 package net.petemc.everlastingwinter.mixin;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.petemc.everlastingwinter.config.MainConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -35,7 +37,13 @@ public abstract class BiomeMixin {
 	}
 
 	private boolean isConfiguredSnowBiome() {
-		ResourceLocation biomeId = ForgeRegistries.BIOMES.getKey((Biome) (Object) this);
+		Registry<?> rawBiomeRegistry = BuiltInRegistries.REGISTRY.get(Registries.BIOME.location());
+		if (rawBiomeRegistry == null) {
+			return false;
+		}
+		@SuppressWarnings("unchecked")
+		Registry<Biome> biomeRegistry = (Registry<Biome>) rawBiomeRegistry;
+		ResourceLocation biomeId = biomeRegistry.getKey((Biome) (Object) this);
 		return MainConfig.isSnowBiome(biomeId);
 	}
 }

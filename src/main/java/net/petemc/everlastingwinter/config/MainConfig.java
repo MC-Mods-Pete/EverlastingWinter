@@ -1,11 +1,10 @@
 package net.petemc.everlastingwinter.config;
 
-import com.electronwill.nightconfig.core.UnmodifiableConfig;
-import com.mojang.serialization.Dynamic;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.common.ModConfigSpec;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -52,22 +51,22 @@ public class MainConfig {
             "minecraft:eroded_badlands",
             "minecraft:wooded_badlands");
 
-    private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
-    private static final ForgeConfigSpec SPEC;
+    private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
+    public static final ModConfigSpec SPEC;
 
-    private static final ForgeConfigSpec.ConfigValue<Boolean> CONSTANT_SNOWFALL;
-    private static final ForgeConfigSpec.ConfigValue<Integer> LAYER_DEPTH;
-    private static final ForgeConfigSpec.ConfigValue<Integer> SNOW_TICK_CHANCE;
-    private static final ForgeConfigSpec.ConfigValue<Boolean> SHOULD_REPLACE_FLOWERS_AND_GRASS;
-    private static final ForgeConfigSpec.ConfigValue<Boolean> REPLACE_SMALL_MUSHROOMS;
-    private static final ForgeConfigSpec.ConfigValue<Boolean> REPLACE_TALL_FLOWERS;
-    private static final ForgeConfigSpec.ConfigValue<Double> BIOME_TEMPERATURE;
-    private static final ForgeConfigSpec.ConfigValue<Boolean> BREAK_CROPS_AND_FARMLAND;
-    private static final ForgeConfigSpec.ConfigValue<Boolean> REPLACE_PATHS;
-    private static final ForgeConfigSpec.ConfigValue<Boolean> REPLACE_TORCHES;
-    private static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_POWDER_SNOW;
-    private static final ForgeConfigSpec.ConfigValue<Integer> POWDER_SNOW_CHANCE;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> LIST_OF_SNOW_BIOMES;
+    private static final ModConfigSpec.ConfigValue<Boolean> CONSTANT_SNOWFALL;
+    private static final ModConfigSpec.ConfigValue<Integer> LAYER_DEPTH;
+    private static final ModConfigSpec.ConfigValue<Integer> SNOW_TICK_CHANCE;
+    private static final ModConfigSpec.ConfigValue<Boolean> SHOULD_REPLACE_FLOWERS_AND_GRASS;
+    private static final ModConfigSpec.ConfigValue<Boolean> REPLACE_SMALL_MUSHROOMS;
+    private static final ModConfigSpec.ConfigValue<Boolean> REPLACE_TALL_FLOWERS;
+    private static final ModConfigSpec.ConfigValue<Double> BIOME_TEMPERATURE;
+    private static final ModConfigSpec.ConfigValue<Boolean> BREAK_CROPS_AND_FARMLAND;
+    private static final ModConfigSpec.ConfigValue<Boolean> REPLACE_PATHS;
+    private static final ModConfigSpec.ConfigValue<Boolean> REPLACE_TORCHES;
+    private static final ModConfigSpec.ConfigValue<Boolean> ENABLE_POWDER_SNOW;
+    private static final ModConfigSpec.ConfigValue<Integer> POWDER_SNOW_CHANCE;
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> LIST_OF_SNOW_BIOMES;
 
     static {
         BUILDER.comment("Everlasting Winter configuration").push("general");
@@ -259,6 +258,6 @@ public class MainConfig {
     }
 
     public static void init() {
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SPEC);
+        ModLoadingContext.get().getActiveContainer().registerConfig(ModConfig.Type.SERVER, SPEC);
     }
 }
