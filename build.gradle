@@ -198,7 +198,6 @@ dependencies {
 
 	//other dependencies
 
-	runtimeOnly fg.deobf("curse.maven:jade--324717:${jade_version}")
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

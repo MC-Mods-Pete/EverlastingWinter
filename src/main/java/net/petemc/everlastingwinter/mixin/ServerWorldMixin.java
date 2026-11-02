@@ -42,7 +42,7 @@ public abstract class ServerWorldMixin {
 			weatherTimer = 0;
 			if (!lastMainConfigValue) {
 				ServerLevel serverLevel = (ServerLevel)(Object)this;
-				this.setWeatherParameters(ServerLevel.RAIN_DELAY.sample(serverLevel.getRandom()), 0, false, false);
+				this.setWeatherParameters(serverLevel.getRandom().nextInt(168000) + 12000, 0, false, false);
 			}
 		}
 		if (lastMainConfigValue) {
@@ -163,7 +163,7 @@ public abstract class ServerWorldMixin {
 				}
 			} else if (!cur.is(BlockTags.LEAVES) && !cur.isAir()
 					&& !cur.is(Blocks.POWDER_SNOW)
-					&& !cur.canBeReplaced()
+					&& !cur.getMaterial().isReplaceable()
 					&& !cur.is(BlockTags.SMALL_FLOWERS)
 					&& !cur.is(BlockTags.TALL_FLOWERS)
 					&& !(cur.getBlock() instanceof SweetBerryBushBlock)) {
@@ -241,7 +241,7 @@ public abstract class ServerWorldMixin {
 			BlockState blockstate = world.getBlockState(blockPos);
 			return (blockstate.getBlock() == Blocks.SNOW) ||
 					blockstate.isAir() ||
-					(((blockstate.canBeReplaced() || blockstate.is(BlockTags.SMALL_FLOWERS)) && !blockstate.isAir()) && MainConfig.isShouldReplaceFlowersAndGrass()) ||
+					(((blockstate.getMaterial().isReplaceable() || blockstate.is(BlockTags.SMALL_FLOWERS)) && !blockstate.isAir()) && MainConfig.isShouldReplaceFlowersAndGrass()) ||
 					(blockstate.getBlock() instanceof MushroomBlock && MainConfig.isReplaceSmallMushrooms()) ||
 					(blockstate.is(BlockTags.TALL_FLOWERS) && MainConfig.isReplaceTallFlowers()) ||
 					(blockstate.getBlock() instanceof SweetBerryBushBlock && MainConfig.isReplaceBerryBushes()) ||

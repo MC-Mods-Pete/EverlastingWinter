@@ -135,8 +135,8 @@ public class MainConfig {
 
         LIST_OF_SNOW_BIOMES = BUILDER
                 .comment("A list with all the biomes that should get snow layers")
-                .defineListAllowEmpty("listOfSnowBiomes",
-                        DEFAULT_SNOW_BIOMES,
+                .defineListAllowEmpty(List.of("listOfSnowBiomes"),
+                        () -> DEFAULT_SNOW_BIOMES,
                          o -> o instanceof String);
 
         BUILDER.pop();

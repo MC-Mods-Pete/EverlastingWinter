@@ -37,16 +37,16 @@ public class EverlastingWinterCommand {
 	}
 
 	private static void fail(CommandSourceStack source, String msg) {
-		source.sendSuccess(() -> Component.literal(msg).withStyle(ChatFormatting.RED), false);
+		source.sendSuccess(Component.literal(msg).withStyle(ChatFormatting.RED), false);
 	}
 
 	private static void ok(CommandSourceStack source, String msg) {
-		source.sendSuccess(() -> Component.literal(msg).withStyle(ChatFormatting.GREEN), false);
+		source.sendSuccess(Component.literal(msg).withStyle(ChatFormatting.GREEN), false);
 	}
 
 	private static int status(CommandContext<CommandSourceStack> ctx) {
 		CommandSourceStack source = ctx.getSource();
-		source.sendSuccess(() -> Component.literal("=== " + EverlastingWinter.MOD_NAME + " runtime state ==="), false);
+		source.sendSuccess(Component.literal("=== " + EverlastingWinter.MOD_NAME + " runtime state ==="), false);
 		for (String name : RuntimeOverrides.knownNames()) {
 			Object cur = RuntimeOverrides.currentValue(name);
 			String suffix = "";
@@ -54,11 +54,11 @@ public class EverlastingWinterCommand {
 				suffix = " (config: " + RuntimeOverrides.format(RuntimeOverrides.defaultValue(name)) + ")";
 			}
 			String line = "  " + name + " = " + RuntimeOverrides.format(cur) + suffix;
-			source.sendSuccess(() -> Component.literal(line), false);
+			source.sendSuccess(Component.literal(line), false);
 		}
 		var biomes = MainConfig.getListOfSnowBiomes();
 		String biomeLine = "  listOfSnowBiomes = " + (biomes == null ? 0 : biomes.size()) + " biomes (read-only, edit the config file)";
-		source.sendSuccess(() -> Component.literal(biomeLine), false);
+		source.sendSuccess(Component.literal(biomeLine), false);
 		return 1;
 	}
 
@@ -89,7 +89,7 @@ public class EverlastingWinterCommand {
 
 	private static int resetAll(CommandContext<CommandSourceStack> ctx) {
 		RuntimeOverrides.resetAll();
-		ctx.getSource().sendSuccess(() -> Component.literal(EverlastingWinter.MOD_NAME + ": all runtime overrides cleared (back to config-file values)."), false);
+		ctx.getSource().sendSuccess(Component.literal(EverlastingWinter.MOD_NAME + ": all runtime overrides cleared (back to config-file values)."), false);
 		return 1;
 	}
 

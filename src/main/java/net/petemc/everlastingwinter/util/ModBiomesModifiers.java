@@ -39,7 +39,7 @@ public class ModBiomesModifiers {
                     ClimateSettingsBuilder climate = builder.getClimateSettings();
                     climate.setTemperature(MainConfig.getBiomeTemperature());
                     climate.setTemperatureModifier(Biome.TemperatureModifier.NONE);
-                    climate.setHasPrecipitation(true);
+                    climate.setPrecipitation(Biome.Precipitation.SNOW);
                     builder.getSpecialEffects().foliageColorOverride(0xDFDFDF);
                 }
             });
