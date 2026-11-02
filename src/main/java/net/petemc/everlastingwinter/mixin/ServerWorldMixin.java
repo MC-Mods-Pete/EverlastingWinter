@@ -64,11 +64,13 @@ public abstract class ServerWorldMixin {
 				this.setWeather((ServerWorld.CLEAR_WEATHER_DURATION_PROVIDER).get(((World) serverWorld).getRandom()), 0, false, false);
 			}
 		}
-		if (weatherTimer <= 0) {
-			this.setWeather(0, 7000, MainConfig.isConstantSnowfall(), false);
-			weatherTimer = 6000;
-		} else {
-			weatherTimer--;
+		if (lastMainConfigValue) {
+			if (weatherTimer <= 0) {
+				this.setWeather(0, 7000, true, false);
+				weatherTimer = 6000;
+			} else {
+				weatherTimer--;
+			}
 		}
 	}
 
@@ -107,11 +109,9 @@ public abstract class ServerWorldMixin {
 				if (!snowPossibleAtPosition(world, blockPos)) {
 					return;
 				}
-				int layerDepth = Math.max(1, MainConfig.getLayerDepth());
 				if (targetBlock == Blocks.SNOW) {
 					int currentLayers = world.getBlockState(blockPos).get(SnowBlock.LAYERS);
-					int totalHeight = currentLayers + countSnowBlocksBelow(world, blockPos) * 8;
-					if (totalHeight < layerDepth) {
+					if (!isSnowStackFull(world, blockPos)) {
 						if (currentLayers < 8) {
 							world.setBlockState(blockPos, Blocks.SNOW.getDefaultState().with(SnowBlock.LAYERS, currentLayers + 1));
 						} else {
@@ -163,10 +163,9 @@ public abstract class ServerWorldMixin {
 		// Canopy/leaf surface: use MOTION_BLOCKING which points to the air above the leaves,
 		// where snow can stack normally.
 		// 50% of the time use the canopy surface, 50% search below for ground/branch.
-		if (world.getBlockState(noLeaves).isIn(BlockTags.LEAVES)) {
-			if (world.getRandom().nextBoolean()) {
-				return motionBlocking;
-			}
+		// A canopy that already carries its full snow load passes the snow on to the ground below.
+		if (world.getRandom().nextBoolean() && !isSnowStackFull(world, motionBlocking)) {
+			return motionBlocking;
 		}
 
 		// Prefer the real ground under the canopy instead of the branch itself.
@@ -185,7 +184,8 @@ public abstract class ServerWorldMixin {
 					&& !cur.isOf(Blocks.POWDER_SNOW)
 					&& !cur.isReplaceable()
 					&& !cur.isIn(BlockTags.SMALL_FLOWERS)
-					&& !cur.isIn(BlockTags.TALL_FLOWERS)) {
+					&& !cur.isIn(BlockTags.TALL_FLOWERS)
+					&& !(cur.getBlock() instanceof SweetBerryBushBlock)) {
 				return p.up();
 			}
 
@@ -217,6 +217,20 @@ public abstract class ServerWorldMixin {
 	}
 
 	@Unique
+	private static boolean isSnowStackFull(World world, BlockPos pos) {
+		BlockState state = world.getBlockState(pos);
+		if (!state.isOf(Blocks.SNOW)) {
+			return false;
+		}
+		int snowBlocks = countSnowBlocksBelow(world, pos);
+		int maxHeight = Math.max(1, MainConfig.getLayerDepth());
+		if (world.getBlockState(pos.down(snowBlocks + 1)).isIn(BlockTags.LEAVES)) {
+			maxHeight = Math.min(maxHeight, MainConfig.getMaxLayersOnLeaves());
+		}
+		return state.get(SnowBlock.LAYERS) + snowBlocks * 8 >= maxHeight;
+	}
+
+	@Unique
 	private static int countSnowBlocksBelow(World world, BlockPos pos) {
 		int count = 0;
 		BlockPos p = pos.down();
@@ -242,12 +256,14 @@ public abstract class ServerWorldMixin {
 				|| (below instanceof SlabBlock && belowState.get(SlabBlock.TYPE) == SlabType.BOTTOM)) {
 			return false;
 		}
-		if (blockPos.getY() >= 0 && blockPos.getY() < 256) {
+		if (blockPos.getY() >= world.getBottomY() && blockPos.getY() < world.getTopY()) {
 			BlockState blockstate = world.getBlockState(blockPos);
 			return (blockstate.getBlock() == Blocks.SNOW) ||
-					((blockstate.isReplaceable() || blockstate.isIn(BlockTags.SMALL_FLOWERS)) && MainConfig.isShouldReplaceFlowersAndGrass()) ||
+					blockstate.isAir() ||
+					(((blockstate.isReplaceable() || blockstate.isIn(BlockTags.SMALL_FLOWERS)) && !blockstate.isAir()) && MainConfig.isShouldReplaceFlowersAndGrass()) ||
 					(blockstate.getBlock() instanceof MushroomPlantBlock && MainConfig.isReplaceSmallMushrooms()) ||
 					(blockstate.isIn(BlockTags.TALL_FLOWERS) && MainConfig.isReplaceTallFlowers()) ||
+					(blockstate.getBlock() instanceof SweetBerryBushBlock && MainConfig.isReplaceBerryBushes()) ||
 					((blockstate.getBlock() instanceof CropBlock || blockstate.getBlock() instanceof StemBlock || blockstate.getBlock() instanceof SweetBerryBushBlock) && belowState.isOf(Blocks.FARMLAND) && MainConfig.isBreakCropsAndFarmland()) ||
 					(blockstate.getBlock() instanceof TorchBlock && MainConfig.isReplaceTorches());
 		}

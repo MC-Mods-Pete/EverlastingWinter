@@ -3,7 +3,7 @@
 	"id": "${mod_id}",
 	"version": "${version}",
 	"name": "${mod_name}",
-	"description": "Creates constant snowfall in the listed biomes.",
+	"description": "Everlasting Winter creates continuous snowfall for a configurable list of biomes.",
 	"authors": [
 		"Pete MC Mods, mcmods.pete@gmail.com"
 	],
@@ -27,14 +27,13 @@
 		"everlastingwinter.mixins.json"
 	],
 	"depends": {
-		"fabricloader": ">=${loader_version}",
+		"fabricloader": "${loader_version_range}",
 		"minecraft": "${minecraft_version_range}",
 		"java": "${java_version_range}",
 		"fabric-api": "*",
 		"cloth-config": ">=${cloth_config_version}"
 	},
 	"suggests": {
-		"modmenu": ">=${modmenu_version}",
-		"another-mod": "*"
+		"modmenu": ">=${modmenu_version}"
 	}
 }

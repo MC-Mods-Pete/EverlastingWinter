@@ -19,7 +19,8 @@ import java.util.concurrent.CompletableFuture;
 public class EverlastingWinterCommand {
 
 	public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-		LiteralArgumentBuilder<ServerCommandSource> root = LiteralArgumentBuilder.<ServerCommandSource>literal("everlastingwinter");
+		LiteralArgumentBuilder<ServerCommandSource> root = LiteralArgumentBuilder.<ServerCommandSource>literal("everlastingwinter")
+				.requires(source -> source.hasPermissionLevel(2));
 
 		root.then(LiteralArgumentBuilder.<ServerCommandSource>literal("status").executes(EverlastingWinterCommand::status));
 
