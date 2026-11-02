@@ -5,6 +5,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
@@ -40,14 +41,17 @@ public abstract class ServerWorldMixin {
 			lastMainConfigValue = MainConfig.isConstantSnowfall();
 			weatherTimer = 0;
 			if (!lastMainConfigValue) {
-				this.setWeatherParameters(0, 0, false, false);
+				ServerLevel serverLevel = (ServerLevel)(Object)this;
+				this.setWeatherParameters(ServerLevel.RAIN_DELAY.sample(serverLevel.getRandom()), 0, false, false);
 			}
 		}
-		if (weatherTimer <= 0) {
-			this.setWeatherParameters(0, 7000, MainConfig.isConstantSnowfall(), false);
-			weatherTimer = 6000;
-		} else {
-			weatherTimer--;
+		if (lastMainConfigValue) {
+			if (weatherTimer <= 0) {
+				this.setWeatherParameters(0, 7000, true, false);
+				weatherTimer = 6000;
+			} else {
+				weatherTimer--;
+			}
 		}
 	}
 
@@ -67,14 +71,10 @@ public abstract class ServerWorldMixin {
 			if (blockPos == null) {
 				return;
 			}
-			boolean configuredSnowBiome = world.getBiome(blockPos)
-					.unwrapKey()
-					.map(key -> MainConfig.isSnowBiome(key.location()))
-					.orElse(false);
-			boolean snowfallActive = MainConfig.isConstantSnowfall() || world.isRaining();
+			Biome biome = world.getBiome(blockPos).value();
 			BlockState targetState = world.getBlockState(blockPos);
 			Block targetBlock = targetState.getBlock();
-			if (configuredSnowBiome && snowfallActive) {
+			if ((world.isRaining() || MainConfig.isConstantSnowfall()) && biome.coldEnoughToSnow(blockPos)) {
 				if (targetBlock == Blocks.POWDER_SNOW) {
 					if (MainConfig.isEnablePowderSnow()) {
 						BlockPos p = blockPos;
@@ -90,11 +90,9 @@ public abstract class ServerWorldMixin {
 				if (!snowPossibleAtPosition(world, blockPos)) {
 					return;
 				}
-				int layerDepth = Math.max(1, MainConfig.getLayerDepth());
 				if (targetBlock == Blocks.SNOW) {
 					int currentLayers = world.getBlockState(blockPos).getValue(SnowLayerBlock.LAYERS);
-					int totalHeight = currentLayers + countSnowBlocksBelow(world, blockPos) * 8;
-					if (totalHeight < layerDepth) {
+					if (!isSnowStackFull(world, blockPos)) {
 						if (currentLayers < 8) {
 							world.setBlockAndUpdate(blockPos, Blocks.SNOW.defaultBlockState().setValue(SnowLayerBlock.LAYERS, currentLayers + 1));
 						} else {
@@ -146,10 +144,9 @@ public abstract class ServerWorldMixin {
 		// Canopy/leaf surface: use MOTION_BLOCKING which points to the air above the leaves,
 		// where snow can stack normally.
 		// 50% of the time use the canopy surface, 50% search below for ground/branch.
-		if (world.getBlockState(noLeaves).is(BlockTags.LEAVES)) {
-			if (world.getRandom().nextBoolean()) {
-				return motionBlocking;
-			}
+		// A canopy that already carries its full snow load passes the snow on to the ground below.
+		if (world.getRandom().nextBoolean() && !isSnowStackFull(world, motionBlocking)) {
+			return motionBlocking;
 		}
 
 		// Prefer the real ground under the canopy instead of the branch itself.
@@ -168,7 +165,8 @@ public abstract class ServerWorldMixin {
 					&& !cur.is(Blocks.POWDER_SNOW)
 					&& !cur.canBeReplaced()
 					&& !cur.is(BlockTags.SMALL_FLOWERS)
-					&& !cur.is(BlockTags.FLOWERS)) {
+					&& !cur.is(BlockTags.TALL_FLOWERS)
+					&& !(cur.getBlock() instanceof SweetBerryBushBlock)) {
 				return p.above();
 			}
 
@@ -197,6 +195,20 @@ public abstract class ServerWorldMixin {
 	@Unique
 	private static boolean isIce(Block block) {
 		return block == Blocks.ICE || block == Blocks.PACKED_ICE || block == Blocks.BLUE_ICE || block == Blocks.FROSTED_ICE;
+	}
+
+	@Unique
+	private static boolean isSnowStackFull(Level world, BlockPos pos) {
+		BlockState state = world.getBlockState(pos);
+		if (!state.is(Blocks.SNOW)) {
+			return false;
+		}
+		int snowBlocks = countSnowBlocksBelow(world, pos);
+		int maxHeight = Math.max(1, MainConfig.getLayerDepth());
+		if (world.getBlockState(pos.below(snowBlocks + 1)).is(BlockTags.LEAVES)) {
+			maxHeight = Math.min(maxHeight, MainConfig.getMaxLayersOnLeaves());
+		}
+		return state.getValue(SnowLayerBlock.LAYERS) + snowBlocks * 8 >= maxHeight;
 	}
 
 	@Unique
@@ -231,7 +243,8 @@ public abstract class ServerWorldMixin {
 					blockstate.isAir() ||
 					(((blockstate.canBeReplaced() || blockstate.is(BlockTags.SMALL_FLOWERS)) && !blockstate.isAir()) && MainConfig.isShouldReplaceFlowersAndGrass()) ||
 					(blockstate.getBlock() instanceof MushroomBlock && MainConfig.isReplaceSmallMushrooms()) ||
-					(blockstate.is(BlockTags.FLOWERS) && MainConfig.isReplaceTallFlowers()) ||
+					(blockstate.is(BlockTags.TALL_FLOWERS) && MainConfig.isReplaceTallFlowers()) ||
+					(blockstate.getBlock() instanceof SweetBerryBushBlock && MainConfig.isReplaceBerryBushes()) ||
 					((blockstate.getBlock() instanceof CropBlock || blockstate.getBlock() instanceof StemBlock || blockstate.getBlock() instanceof SweetBerryBushBlock) && belowState.is(Blocks.FARMLAND) && MainConfig.isBreakCropsAndFarmland()) ||
 					(blockstate.getBlock() instanceof TorchBlock && MainConfig.isReplaceTorches());
 		}

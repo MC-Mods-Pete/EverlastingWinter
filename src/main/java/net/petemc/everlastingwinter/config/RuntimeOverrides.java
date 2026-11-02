@@ -17,7 +17,7 @@ import java.util.function.Supplier;
  */
 public class RuntimeOverrides {
 
-	public enum Type { BOOLEAN, INT, FLOAT }
+	public enum Type { BOOLEAN, INT }
 
 	private static final Map<String, Entry> REGISTRY = new LinkedHashMap<>();
 	private static final Map<String, Object> OVERRIDES = new HashMap<>();
@@ -37,10 +37,12 @@ public class RuntimeOverrides {
 	static {
 		register("constantSnowfall", Type.BOOLEAN, MainConfig::rawConstantSnowfall);
 		register("layerDepth", Type.INT, MainConfig::rawLayerDepth);
+		register("maxLayersOnLeaves", Type.INT, MainConfig::rawMaxLayersOnLeaves);
 		register("snowTickChance", Type.INT, MainConfig::rawSnowTickChance);
 		register("shouldReplaceFlowersAndGrass", Type.BOOLEAN, MainConfig::rawShouldReplaceFlowersAndGrass);
 		register("replaceSmallMushrooms", Type.BOOLEAN, MainConfig::rawReplaceSmallMushrooms);
 		register("replaceTallFlowers", Type.BOOLEAN, MainConfig::rawReplaceTallFlowers);
+		register("replaceBerryBushes", Type.BOOLEAN, MainConfig::rawReplaceBerryBushes);
 		register("breakCropsAndFarmland", Type.BOOLEAN, MainConfig::rawBreakCropsAndFarmland);
 		register("replacePaths", Type.BOOLEAN, MainConfig::rawReplacePaths);
 		register("replaceTorches", Type.BOOLEAN, MainConfig::rawReplaceTorches);
@@ -116,9 +118,6 @@ public class RuntimeOverrides {
 		if (value == null) {
 			return "null";
 		}
-		if (value instanceof Float) {
-			return String.valueOf((float) value);
-		}
 		return String.valueOf(value);
 	}
 
@@ -134,11 +133,6 @@ public class RuntimeOverrides {
 	public static Integer getInt(String name) {
 		Object v = OVERRIDES.get(name);
 		return v instanceof Integer ? (Integer) v : null;
-	}
-
-	public static Float getFloat(String name) {
-		Object v = OVERRIDES.get(name);
-		return v instanceof Float ? (Float) v : null;
 	}
 
 	public static ParseResult set(String name, String rawValue) {
@@ -161,11 +155,6 @@ public class RuntimeOverrides {
 					int i = (int) Math.round(Double.parseDouble(value));
 					OVERRIDES.put(name, i);
 					return ParseResult.ok(e.name + " set to " + i + " (until game exit).");
-				}
-				case FLOAT: {
-					float f = (float) Double.parseDouble(value);
-					OVERRIDES.put(name, f);
-					return ParseResult.ok(e.name + " set to " + f + " (until game exit).");
 				}
 				default:
 					return ParseResult.fail("Unsupported option type for '" + e.name + "'.");

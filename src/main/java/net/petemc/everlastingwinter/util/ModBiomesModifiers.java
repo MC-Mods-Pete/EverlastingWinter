@@ -2,6 +2,7 @@ package net.petemc.everlastingwinter.util;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Holder;
+import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraftforge.common.world.BiomeModifier;
 import net.minecraftforge.common.world.ClimateSettingsBuilder;
@@ -29,7 +30,7 @@ public class ModBiomesModifiers {
 
         @Override
         public void modify(Holder<Biome> holder, Phase phase, ModifiableBiomeInfo.BiomeInfo.Builder builder) {
-            if (phase != Phase.MODIFY) {
+            if (phase != Phase.MODIFY || !holder.is(BiomeTags.IS_OVERWORLD)) {
                 return;
             }
             holder.unwrapKey().ifPresent(key -> {
@@ -38,7 +39,6 @@ public class ModBiomesModifiers {
                     ClimateSettingsBuilder climate = builder.getClimateSettings();
                     climate.setTemperature(MainConfig.getBiomeTemperature());
                     climate.setTemperatureModifier(Biome.TemperatureModifier.NONE);
-                    climate.setDownfall(0.5F);
                     climate.setHasPrecipitation(true);
                     builder.getSpecialEffects().foliageColorOverride(0xDFDFDF);
                 }
