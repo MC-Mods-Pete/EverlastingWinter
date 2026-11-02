@@ -60,6 +60,17 @@ public class EverlastingWinterApi {
 		RuntimeOverrides.set("layerDepth", String.valueOf(Math.max(1, value)));
 	}
 
+	// --- maxLayersOnLeaves ---
+
+	public static int getMaxLayersOnLeaves() {
+		Integer v = RuntimeOverrides.getInt("maxLayersOnLeaves");
+		return v != null ? v : ((Number) RuntimeOverrides.currentValue("maxLayersOnLeaves")).intValue();
+	}
+
+	public static void setMaxLayersOnLeaves(int value) {
+		RuntimeOverrides.set("maxLayersOnLeaves", String.valueOf(Math.max(1, value)));
+	}
+
 	// --- snowTickChance ---
 
 	public static int getSnowTickChance() {
@@ -102,6 +113,17 @@ public class EverlastingWinterApi {
 
 	public static void setReplaceTallFlowers(boolean value) {
 		RuntimeOverrides.set("replaceTallFlowers", String.valueOf(value));
+	}
+
+	// --- replaceBerryBushes ---
+
+	public static boolean isReplaceBerryBushes() {
+		Boolean v = RuntimeOverrides.getBoolean("replaceBerryBushes");
+		return v != null ? v : (Boolean) RuntimeOverrides.currentValue("replaceBerryBushes");
+	}
+
+	public static void setReplaceBerryBushes(boolean value) {
+		RuntimeOverrides.set("replaceBerryBushes", String.valueOf(value));
 	}
 
 	// --- breakCropsAndFarmland ---

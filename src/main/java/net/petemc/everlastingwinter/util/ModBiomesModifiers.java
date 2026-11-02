@@ -15,7 +15,7 @@ public class ModBiomesModifiers {
         BiomeModifications.create(new Identifier(EverlastingWinter.MOD_ID, "biome_modifications"))
                 .add(ModificationPhase.POST_PROCESSING,
                         BiomeSelectors.foundInOverworld().and(context ->
-                                Arrays.stream(snowBiomes).anyMatch(s -> s.equalsIgnoreCase(context.getBiomeKey().getValue().toString()))),
+                                Arrays.stream(snowBiomes).anyMatch(s -> s.trim().equalsIgnoreCase(context.getBiomeKey().getValue().toString()))),
                         (selection, context) -> {
                             context.getWeather().setPrecipitation(true);
                             context.getWeather().setTemperature(MainConfig.getBiomeTemperature());

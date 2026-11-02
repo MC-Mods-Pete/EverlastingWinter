@@ -26,9 +26,19 @@ public class MainConfig implements ConfigData {
         return o != null ? o : INSTANCE.replaceTallFlowers;
     }
 
+    public static boolean isReplaceBerryBushes() {
+        Boolean o = RuntimeOverrides.getBoolean("replaceBerryBushes");
+        return o != null ? o : INSTANCE.replaceBerryBushes;
+    }
+
     public static int getLayerDepth() {
         Integer o = RuntimeOverrides.getInt("layerDepth");
         return o != null ? Math.max(1, o) : INSTANCE.layerDepth;
+    }
+
+    public static int getMaxLayersOnLeaves() {
+        Integer o = RuntimeOverrides.getInt("maxLayersOnLeaves");
+        return o != null ? Math.max(1, o) : INSTANCE.maxLayersOnLeaves;
     }
 
     public static int getSnowTickChance() {
@@ -78,6 +88,10 @@ public class MainConfig implements ConfigData {
         return INSTANCE.layerDepth;
     }
 
+    static int rawMaxLayersOnLeaves() {
+        return INSTANCE.maxLayersOnLeaves;
+    }
+
     static int rawSnowTickChance() {
         return INSTANCE.snowTickChance;
     }
@@ -92,6 +106,10 @@ public class MainConfig implements ConfigData {
 
     static boolean rawReplaceTallFlowers() {
         return INSTANCE.replaceTallFlowers;
+    }
+
+    static boolean rawReplaceBerryBushes() {
+        return INSTANCE.replaceBerryBushes;
     }
 
     static boolean rawBreakCropsAndFarmland() {
@@ -114,8 +132,6 @@ public class MainConfig implements ConfigData {
         return INSTANCE.powderSnowChance;
     }
 
-
-
     public static String[] getListOfSnowBiomes() {
         return INSTANCE.listOfSnowBiomes;
     }
@@ -128,6 +144,15 @@ public class MainConfig implements ConfigData {
         INSTANCE = AutoConfig.getConfigHolder(MainConfig.class).getConfig();
     }
 
+    @Override
+    public void validatePostLoad() {
+        layerDepth = Math.max(1, Math.min(255, layerDepth));
+        maxLayersOnLeaves = Math.max(1, Math.min(255, maxLayersOnLeaves));
+        snowTickChance = Math.max(0, Math.min(100, snowTickChance));
+        powderSnowChance = Math.max(0, Math.min(100, powderSnowChance));
+        biomeTemperature = Math.max(-2.0f, Math.min(2.0f, biomeTemperature));
+    }
+
     @ConfigEntry.Gui.Tooltip()
     @Comment("If true, it's always snowing (forces snowfall regardless of weather) | default: true")
     private boolean constantSnowfall = true;
@@ -135,6 +160,10 @@ public class MainConfig implements ConfigData {
     @ConfigEntry.Gui.Tooltip()
     @Comment("Maximum total snow height in eighth-blocks above non-snow blocks (1 layer = 1, 1 snow block = 8 layers). Snow blocks stack upward, existing blocks are never replaced | default: 12 | min: 1")
     private int layerDepth = 12;
+
+    @ConfigEntry.Gui.Tooltip()
+    @Comment("Maximum total snow height on leaves in eighth-blocks, also limited by layerDepth. Values from 8 allow snow blocks on leaves | default: 4 | min: 1")
+    private int maxLayersOnLeaves = 4;
 
     @ConfigEntry.Gui.Tooltip()
     @Comment("Chance (in percent) that a snow tick happens for a chunk each game tick | default: 3")
@@ -151,6 +180,10 @@ public class MainConfig implements ConfigData {
     @ConfigEntry.Gui.Tooltip()
     @Comment("If true, tall flowers can be replaced with snow layers | default: true")
     private boolean replaceTallFlowers = true;
+
+    @ConfigEntry.Gui.Tooltip()
+    @Comment("If true, sweet berry bushes can be replaced with snow layers. Bushes on farmland are also replaced by breakCropsAndFarmland | default: false")
+    private boolean replaceBerryBushes = false;
 
     @ConfigEntry.Gui.Tooltip()
     @Comment("The temperature of the biome | default: -1.0")
@@ -221,101 +254,3 @@ public class MainConfig implements ConfigData {
             "minecraft:wooded_badlands"
             };
 }
-
-/*
-public class MainConfig {
-    private static Gson GSON = (new GsonBuilder()).setPrettyPrinting().create();
-    public static MainConfig INSTANCE;
-    private int layer_depth = 3;
-    private int layered_frequency = 32;
-    private boolean replace_flowers_grass = true;
-
-    public MainConfig() {
-        INSTANCE = this;
-    }
-
-    public int getLayerDepth() {
-        return this.layer_depth > 8 ? 8 : this.layer_depth;
-    }
-
-    public int getSnowTickChance() {
-        return INSTANCE.snowTickChance;
-    }
-
-    public boolean shouldReplaceFlowersGrass() {
-        return this.replace_flowers_grass;
-    }
-
-    public static String[] getSpawningList() { return INSTANCE.spawningList; }
-
-    //@ConfigEntry.Gui.Tooltip()
-    //@Comment("A list with all the mobs that can spawn from a broken pot [id:entity-probability] (probability is written in decimal. 1.0 = 100%, 0.5 = 50%, 0.03 = 3%)")
-    private final String[] spawningList = new String[]{
-            "minecraft:bat-0.03",
-            "minecraft:endermite-0.06",
-            "minecraft:slime-0.05",
-            "minecraft:cave_spider-0.03",
-            "minecraft:husk-0.05",
-            "minecraft:vex-0.008",
-            "minecraft:cat-0.005",
-            "minecraft:silverfish-0.08" };
-
-    public static void load() {
-        File file = new File("config/layered_snowfall.json");
-        if (!file.exists()) {
-            generate();
-        }
-
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            StringBuilder sb = new StringBuilder();
-            String s = null;
-
-            while((s = reader.readLine()) != null) {
-                sb.append(s);
-            }
-
-            reader.close();
-            INSTANCE = (MainConfig)GSON.fromJson(sb.toString(), MainConfig.class);
-        } catch (Exception var4) {
-            INSTANCE = new MainConfig();
-        }
-
-        save();
-    }
-
-    private static void generate() {
-        File file = new File("config/layered_snowfall.json");
-        if (!file.getParentFile().exists()) {
-            file.getParentFile().mkdirs();
-        }
-
-        INSTANCE = new MainConfig();
-
-        try {
-            FileWriter writer = new FileWriter(file);
-            writer.write(GSON.toJson(INSTANCE));
-            writer.close();
-        } catch (Exception var2) {
-        }
-
-    }
-
-    private static void save() {
-        File file = new File("config/layered_snowfall.json");
-        if (!file.getParentFile().exists()) {
-            file.getParentFile().mkdirs();
-        }
-
-        try {
-            FileWriter writer = new FileWriter(file);
-            writer.write(GSON.toJson(INSTANCE));
-            writer.close();
-        } catch (Exception var2) {
-        }
-
-    }
-}
-
- */
-

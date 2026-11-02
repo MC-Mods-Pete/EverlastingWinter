@@ -3,7 +3,7 @@
 	"id": "${mod_id}",
 	"version": "${version}",
 	"name": "${mod_name}",
-	"description": "Creates constant snowfall in the listed biomes.",
+	"description": "Everlasting Winter creates continuous snowfall for a configurable list of biomes.",
 	"authors": [
 		"Pete MC Mods, mcmods.pete@gmail.com"
 	],
@@ -34,7 +34,6 @@
 		"cloth-config": ">=${cloth_config_version}"
 	},
 	"suggests": {
-		"modmenu": ">=${modmenu_version}",
-		"another-mod": "*"
+		"modmenu": ">=${modmenu_version}"
 	}
 }

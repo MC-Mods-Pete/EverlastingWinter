@@ -2,13 +2,7 @@ package net.petemc.everlastingwinter;
 
 import net.fabricmc.api.ModInitializer;
 
-import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
-import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
-import net.fabricmc.fabric.api.biome.v1.ModificationPhase;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeKeys;
 import net.petemc.everlastingwinter.command.EverlastingWinterCommand;
 import net.petemc.everlastingwinter.config.MainConfig;
 import net.petemc.everlastingwinter.util.ModBiomesModifiers;
