@@ -22,14 +22,9 @@ public abstract class WorldMixin {
 	// Override it directly so undead mobs are protected in all open areas.
 	@Inject(method = "isRainingAt", at = @At("RETURN"), cancellable = true)
 	private void onHasRain(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-		if (!cir.getReturnValue()) {
+		if (MainConfig.isConstantSnowfall() && !cir.getReturnValue()) {
 			// Only protect when sky is visible — same rule as real rain
-			Level level = (Level)(Object)this;
-			boolean configuredSnowBiome = level.getBiome(pos)
-					.unwrapKey()
-					.map(key -> MainConfig.isSnowBiome(key.location()))
-					.orElse(false);
-			if (configuredSnowBiome && level.canSeeSky(pos)) {
+			if (((Level)(Object)this).canSeeSky(pos)) {
 				cir.setReturnValue(true);
 			}
 		}

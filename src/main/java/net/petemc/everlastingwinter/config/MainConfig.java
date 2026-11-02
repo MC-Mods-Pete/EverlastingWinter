@@ -1,12 +1,11 @@
 package net.petemc.everlastingwinter.config;
 
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.fml.ModLoadingContext;
-import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class MainConfig {
     private static final List<String> DEFAULT_SNOW_BIOMES = Arrays.asList(
@@ -56,10 +55,12 @@ public class MainConfig {
 
     private static final ModConfigSpec.ConfigValue<Boolean> CONSTANT_SNOWFALL;
     private static final ModConfigSpec.ConfigValue<Integer> LAYER_DEPTH;
+    private static final ModConfigSpec.ConfigValue<Integer> MAX_LAYERS_ON_LEAVES;
     private static final ModConfigSpec.ConfigValue<Integer> SNOW_TICK_CHANCE;
     private static final ModConfigSpec.ConfigValue<Boolean> SHOULD_REPLACE_FLOWERS_AND_GRASS;
     private static final ModConfigSpec.ConfigValue<Boolean> REPLACE_SMALL_MUSHROOMS;
     private static final ModConfigSpec.ConfigValue<Boolean> REPLACE_TALL_FLOWERS;
+    private static final ModConfigSpec.ConfigValue<Boolean> REPLACE_BERRY_BUSHES;
     private static final ModConfigSpec.ConfigValue<Double> BIOME_TEMPERATURE;
     private static final ModConfigSpec.ConfigValue<Boolean> BREAK_CROPS_AND_FARMLAND;
     private static final ModConfigSpec.ConfigValue<Boolean> REPLACE_PATHS;
@@ -79,6 +80,10 @@ public class MainConfig {
                 .comment("Maximum total snow height in eighth-blocks above non-snow blocks (1 layer = 1, 1 snow block = 8 layers). Snow blocks stack upward, existing blocks are never replaced | default: 12 | min: 1")
                 .defineInRange("layerDepth", 12, 1, 255);
 
+        MAX_LAYERS_ON_LEAVES = BUILDER
+                .comment("Maximum total snow height on leaves in eighth-blocks, also limited by layerDepth. Values from 8 allow snow blocks on leaves | default: 4 | min: 1")
+                .defineInRange("maxLayersOnLeaves", 4, 1, 255);
+
         SNOW_TICK_CHANCE = BUILDER
                 .comment("Chance (in percent) that a snow tick happens for a chunk each game tick | default: 3")
                 .defineInRange("snowTickChance", 3, 0, 100);
@@ -94,6 +99,10 @@ public class MainConfig {
         REPLACE_TALL_FLOWERS = BUILDER
                 .comment("If true, tall flowers can be replaced with snow layers | default: true")
                 .define("replaceTallFlowers", true);
+
+        REPLACE_BERRY_BUSHES = BUILDER
+                .comment("If true, sweet berry bushes can be replaced with snow layers. Bushes on farmland are also replaced by breakCropsAndFarmland | default: false")
+                .define("replaceBerryBushes", false);
 
         BIOME_TEMPERATURE = BUILDER
                 .comment("The temperature of the biome | default: -1.0")
@@ -149,9 +158,19 @@ public class MainConfig {
         return o != null ? o : REPLACE_TALL_FLOWERS.get();
     }
 
+    public static boolean isReplaceBerryBushes() {
+        Boolean o = RuntimeOverrides.getBoolean("replaceBerryBushes");
+        return o != null ? o : REPLACE_BERRY_BUSHES.get();
+    }
+
     public static int getLayerDepth() {
         Integer o = RuntimeOverrides.getInt("layerDepth");
         return o != null ? Math.max(1, o) : LAYER_DEPTH.get();
+    }
+
+    public static int getMaxLayersOnLeaves() {
+        Integer o = RuntimeOverrides.getInt("maxLayersOnLeaves");
+        return o != null ? Math.max(1, o) : MAX_LAYERS_ON_LEAVES.get();
     }
 
     public static int getSnowTickChance() {
@@ -205,7 +224,7 @@ public class MainConfig {
             if (rawBiomeId == null) {
                 continue;
             }
-            ResourceLocation configured = ResourceLocation.tryParse(rawBiomeId.trim());
+            ResourceLocation configured = ResourceLocation.tryParse(rawBiomeId.trim().toLowerCase(Locale.ROOT));
             if (configured != null && configured.equals(biomeId)) {
                 return true;
             }
@@ -214,50 +233,54 @@ public class MainConfig {
     }
 
     public static boolean rawConstantSnowfall() {
-        return true;
+        return CONSTANT_SNOWFALL.get();
     }
 
     public static int rawLayerDepth() {
-        return 12;
+        return LAYER_DEPTH.get();
+    }
+
+    public static int rawMaxLayersOnLeaves() {
+        return MAX_LAYERS_ON_LEAVES.get();
     }
 
     public static int rawSnowTickChance() {
-        return 3;
+        return SNOW_TICK_CHANCE.get();
     }
 
     public static boolean rawShouldReplaceFlowersAndGrass() {
-        return true;
+        return SHOULD_REPLACE_FLOWERS_AND_GRASS.get();
     }
 
     public static boolean rawReplaceSmallMushrooms() {
-        return false;
+        return REPLACE_SMALL_MUSHROOMS.get();
     }
 
     public static boolean rawReplaceTallFlowers() {
-        return true;
+        return REPLACE_TALL_FLOWERS.get();
+    }
+
+    public static boolean rawReplaceBerryBushes() {
+        return REPLACE_BERRY_BUSHES.get();
     }
 
     public static boolean rawBreakCropsAndFarmland() {
-        return true;
+        return BREAK_CROPS_AND_FARMLAND.get();
     }
 
     public static boolean rawReplacePaths() {
-        return true;
+        return REPLACE_PATHS.get();
     }
 
     public static boolean rawReplaceTorches() {
-        return false;
+        return REPLACE_TORCHES.get();
     }
 
     public static boolean rawEnablePowderSnow() {
-        return false;
+        return ENABLE_POWDER_SNOW.get();
     }
 
     public static int rawPowderSnowChance() {
-        return 10;
-    }
-
-    public static void init() {
-        ModLoadingContext.get().getActiveContainer().registerConfig(ModConfig.Type.SERVER, SPEC);
+        return POWDER_SNOW_CHANCE.get();
     }
 }
