@@ -20,7 +20,7 @@ public class ModBiomesModifiers {
                             context.getWeather().setPrecipitation(true);
                             context.getWeather().setTemperature(MainConfig.getBiomeTemperature());
                             context.getWeather().setTemperatureModifier(Biome.TemperatureModifier.NONE);
-                            context.getEffects().setFoliageColor(0xdfdfdf);
+                            context.getEffects().setFoliageColorOverride(0xdfdfdf);
                         });
     }
 

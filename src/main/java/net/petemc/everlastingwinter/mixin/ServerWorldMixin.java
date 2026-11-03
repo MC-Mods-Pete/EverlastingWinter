@@ -38,12 +38,12 @@ public abstract class ServerWorldMixin {
 			lastMainConfigValue = MainConfig.isConstantSnowfall();
 			weatherTimer = 0;
 			if (!lastMainConfigValue) {
-				serverLevel.setWeatherParameters(ServerLevel.RAIN_DELAY.sample(serverLevel.getRandom()), 0, false, false);
+				serverLevel.getServer().setWeatherParameters(ServerLevel.RAIN_DELAY.sample(serverLevel.getRandom()), 0, false, false);
 			}
 		}
 		if (lastMainConfigValue) {
 			if (weatherTimer <= 0) {
-				serverLevel.setWeatherParameters(0, 7000, true, false);
+				serverLevel.getServer().setWeatherParameters(0, 7000, true, false);
 				weatherTimer = 6000;
 			} else {
 				weatherTimer--;
