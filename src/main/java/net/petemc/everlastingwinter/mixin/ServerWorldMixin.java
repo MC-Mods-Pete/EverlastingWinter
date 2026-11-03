@@ -1,40 +1,20 @@
 package net.petemc.everlastingwinter.mixin;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.CropBlock;
-import net.minecraft.block.DirtPathBlock;
-import net.minecraft.block.FenceBlock;
-import net.minecraft.block.FenceGateBlock;
-import net.minecraft.block.FluidBlock;
-import net.minecraft.block.KelpBlock;
-import net.minecraft.block.KelpPlantBlock;
-import net.minecraft.block.MushroomPlantBlock;
-import net.minecraft.block.SeagrassBlock;
-import net.minecraft.block.SlabBlock;
-import net.minecraft.block.SnowBlock;
-import net.minecraft.block.StairsBlock;
-import net.minecraft.block.StemBlock;
-import net.minecraft.block.SweetBerryBushBlock;
-import net.minecraft.block.TallPlantBlock;
-import net.minecraft.block.TallSeagrassBlock;
-import net.minecraft.block.TorchBlock;
-import net.minecraft.block.WallBlock;
-import net.minecraft.block.enums.DoubleBlockHalf;
-import net.minecraft.block.enums.SlabType;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.Heightmap;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.block.state.properties.SlabType;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.petemc.everlastingwinter.config.MainConfig;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -42,11 +22,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.function.BooleanSupplier;
 
-@Mixin(ServerWorld.class)
+@Mixin(ServerLevel.class)
 public abstract class ServerWorldMixin {
-	@Shadow
-	public abstract void setWeather(int clearDuration, int rainDuration, boolean raining, boolean thundering);
-
 	@Unique
 	private boolean lastMainConfigValue = false;
 
@@ -55,18 +32,18 @@ public abstract class ServerWorldMixin {
 
 	// Runs once per world tick — keeps weather permanently in sync with the config.
 	@Inject(at = {@At("HEAD")}, method = {"tick"})
-	private void tick(BooleanSupplier shouldKeepTicking, CallbackInfo info) {
-		ServerWorld serverWorld = (ServerWorld)(Object)this;
+	private void ewonTick(BooleanSupplier shouldKeepTicking, CallbackInfo info) {
+		ServerLevel serverLevel = (ServerLevel)(Object)this;
 		if (lastMainConfigValue != MainConfig.isConstantSnowfall()) {
 			lastMainConfigValue = MainConfig.isConstantSnowfall();
 			weatherTimer = 0;
 			if (!lastMainConfigValue) {
-				this.setWeather((ServerWorld.CLEAR_WEATHER_DURATION_PROVIDER).get(((World) serverWorld).getRandom()), 0, false, false);
+				serverLevel.setWeatherParameters(ServerLevel.RAIN_DELAY.sample(serverLevel.getRandom()), 0, false, false);
 			}
 		}
 		if (lastMainConfigValue) {
 			if (weatherTimer <= 0) {
-				this.setWeather(0, 7000, true, false);
+				serverLevel.setWeatherParameters(0, 7000, true, false);
 				weatherTimer = 6000;
 			} else {
 				weatherTimer--;
@@ -75,33 +52,33 @@ public abstract class ServerWorldMixin {
 	}
 
 	@Inject(at = {@At("HEAD")}, method = {"tickChunk"})
-	private void tickChunk(WorldChunk chunk, int randomTickSpeed, CallbackInfo info) {
-		ServerWorld serverWorld = (ServerWorld)(Object)this;
-		chunkSnowTick(serverWorld, chunk);
+	private void ewonTickChunk(LevelChunk chunk, int randomTickSpeed, CallbackInfo info) {
+		ServerLevel serverLevel = (ServerLevel)(Object)this;
+		chunkSnowTick(serverLevel, chunk);
 	}
 
 	@Unique
-	private static void chunkSnowTick(ServerWorld world, Chunk chunk) {
+	private static void chunkSnowTick(Level world, ChunkAccess chunk) {
 		ChunkPos chunkpos = chunk.getPos();
-		int i = chunkpos.getStartX();
-		int j = chunkpos.getStartZ();
-		if (world.random.nextInt(100) < MainConfig.getSnowTickChance()) {
-			BlockPos blockPos = findSnowTarget(world, world.getRandomPosInChunk(i, 0, j, 15));
+		int i = chunkpos.getMinBlockX();
+		int j = chunkpos.getMinBlockZ();
+		if (world.getRandom().nextInt(100) < MainConfig.getSnowTickChance()) {
+			BlockPos blockPos = findSnowTarget(world, world.getBlockRandomPos(i, 0, j, 15));
 			if (blockPos == null) {
 				return;
 			}
 			Biome biome = world.getBiome(blockPos).value();
 			BlockState targetState = world.getBlockState(blockPos);
 			Block targetBlock = targetState.getBlock();
-			if ((world.isRaining() || MainConfig.isConstantSnowfall()) && biome.isCold(blockPos)) {
+			if ((world.isRaining() || MainConfig.isConstantSnowfall()) && biome.coldEnoughToSnow(blockPos, world.getSeaLevel())) {
 				if (targetBlock == Blocks.POWDER_SNOW) {
 					if (MainConfig.isEnablePowderSnow()) {
 						BlockPos p = blockPos;
-						while (world.getBlockState(p).isOf(Blocks.POWDER_SNOW)) {
-							p = p.down();
+						while (world.getBlockState(p).is(Blocks.POWDER_SNOW)) {
+							p = p.below();
 						}
-						if (world.getBlockState(p).isOf(Blocks.SNOW_BLOCK) && world.random.nextInt(100) < MainConfig.getPowderSnowChance()) {
-							world.setBlockState(p, Blocks.POWDER_SNOW.getDefaultState());
+						if (world.getBlockState(p).is(Blocks.SNOW_BLOCK) && world.getRandom().nextInt(100) < MainConfig.getPowderSnowChance()) {
+							world.setBlockAndUpdate(p, Blocks.POWDER_SNOW.defaultBlockState());
 						}
 					}
 					return;
@@ -110,50 +87,50 @@ public abstract class ServerWorldMixin {
 					return;
 				}
 				if (targetBlock == Blocks.SNOW) {
-					int currentLayers = world.getBlockState(blockPos).get(SnowBlock.LAYERS);
+					int currentLayers = world.getBlockState(blockPos).getValue(SnowLayerBlock.LAYERS);
 					if (!isSnowStackFull(world, blockPos)) {
 						if (currentLayers < 8) {
-							world.setBlockState(blockPos, Blocks.SNOW.getDefaultState().with(SnowBlock.LAYERS, currentLayers + 1));
+							world.setBlockAndUpdate(blockPos, Blocks.SNOW.defaultBlockState().setValue(SnowLayerBlock.LAYERS, currentLayers + 1));
 						} else {
-							if (MainConfig.isEnablePowderSnow() && world.random.nextInt(100) < MainConfig.getPowderSnowChance()
-								&& !world.getBlockState(blockPos.down()).isIn(BlockTags.LEAVES)
-								&& !world.getBlockState(blockPos.down()).isIn(BlockTags.LOGS)) {
-								world.setBlockState(blockPos, Blocks.POWDER_SNOW.getDefaultState());
+							if (MainConfig.isEnablePowderSnow() && world.getRandom().nextInt(100) < MainConfig.getPowderSnowChance()
+								&& !world.getBlockState(blockPos.below()).is(BlockTags.LEAVES)
+								&& !world.getBlockState(blockPos.below()).is(BlockTags.LOGS)) {
+								world.setBlockAndUpdate(blockPos, Blocks.POWDER_SNOW.defaultBlockState());
 							} else {
-								world.setBlockState(blockPos, Blocks.SNOW_BLOCK.getDefaultState());
-								world.setBlockState(blockPos.up(), Blocks.SNOW.getDefaultState().with(SnowBlock.LAYERS, 1));
+								world.setBlockAndUpdate(blockPos, Blocks.SNOW_BLOCK.defaultBlockState());
+								world.setBlockAndUpdate(blockPos.above(), Blocks.SNOW.defaultBlockState().setValue(SnowLayerBlock.LAYERS, 1));
 							}
 						}
 					}
 				} else if (targetBlock != Blocks.SNOW_BLOCK && targetBlock != Blocks.POWDER_SNOW) {
-					BlockState belowState = world.getBlockState(blockPos.down());
-					if (belowState.isOf(Blocks.FARMLAND) && MainConfig.isBreakCropsAndFarmland()) {
-						world.setBlockState(blockPos.down(), Blocks.DIRT.getDefaultState());
-					} else if (belowState.isOf(Blocks.DIRT_PATH) && MainConfig.isReplacePaths()) {
-						world.setBlockState(blockPos.down(), Blocks.DIRT.getDefaultState());
+					BlockState belowState = world.getBlockState(blockPos.below());
+					if (belowState.is(Blocks.FARMLAND) && MainConfig.isBreakCropsAndFarmland()) {
+						world.setBlockAndUpdate(blockPos.below(), Blocks.DIRT.defaultBlockState());
+					} else if (belowState.is(Blocks.DIRT_PATH) && MainConfig.isReplacePaths()) {
+						world.setBlockAndUpdate(blockPos.below(), Blocks.DIRT.defaultBlockState());
 					}
 					if (targetBlock instanceof TorchBlock && MainConfig.isReplaceTorches()) {
-						Block.dropStacks(world.getBlockState(blockPos), world, blockPos);
+						Block.dropResources(world.getBlockState(blockPos), world, blockPos);
 					}
 					// Remove the upper half of tall plants before placing snow
-					if (targetBlock instanceof TallPlantBlock && MainConfig.isShouldReplaceFlowersAndGrass()) {
-						DoubleBlockHalf half = targetState.get(TallPlantBlock.HALF);
+					if (targetBlock instanceof DoublePlantBlock && MainConfig.isShouldReplaceFlowersAndGrass()) {
+						DoubleBlockHalf half = targetState.getValue(DoublePlantBlock.HALF);
 						if (half == DoubleBlockHalf.LOWER) {
-							world.setBlockState(blockPos.up(), Blocks.AIR.getDefaultState());
+							world.setBlockAndUpdate(blockPos.above(), Blocks.AIR.defaultBlockState());
 						} else {
-							world.setBlockState(blockPos.down(), Blocks.AIR.getDefaultState());
+							world.setBlockAndUpdate(blockPos.below(), Blocks.AIR.defaultBlockState());
 						}
 					}
-					world.setBlockState(blockPos, Blocks.SNOW.getDefaultState().with(SnowBlock.LAYERS, 1));
+					world.setBlockAndUpdate(blockPos, Blocks.SNOW.defaultBlockState().setValue(SnowLayerBlock.LAYERS, 1));
 				}
 			}
 		}
 	}
 
 	@Unique
-	private static BlockPos findSnowTarget(World world, BlockPos samplePos) {
-		BlockPos motionBlocking = world.getTopPosition(Heightmap.Type.MOTION_BLOCKING, samplePos);
-		BlockPos noLeaves = world.getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, samplePos);
+	private static BlockPos findSnowTarget(Level world, BlockPos samplePos) {
+		BlockPos motionBlocking = world.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, samplePos);
+		BlockPos noLeaves = world.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, samplePos);
 
 		// No tree overhead — use simple position.
 		if (motionBlocking.equals(noLeaves)) {
@@ -172,35 +149,35 @@ public abstract class ServerWorldMixin {
 		// A branch is only used as a low-probability fallback when no valid ground is found
 		// within a short downward search and the branch has air above it.
 		BlockPos p = noLeaves;
-		BlockState prev = world.getBlockState(p.up());
-		for (int depth = 0; depth < 20 && p.getY() > world.getBottomY(); depth++) {
+		BlockState prev = world.getBlockState(p.above());
+		for (int depth = 0; depth < 20 && p.getY() > world.getMinY(); depth++) {
 			BlockState cur = world.getBlockState(p);
 
-			if (cur.isIn(BlockTags.LOGS)) {
-				if (prev.isAir() && branchFallbackChance(world, p)) {
-					return p.up();
+			if (cur.is(BlockTags.LOGS)) {
+				if (prev.isAir() && branchFallbackChance(p)) {
+					return p.above();
 				}
-			} else if (!cur.isIn(BlockTags.LEAVES) && !cur.isAir()
-					&& !cur.isOf(Blocks.POWDER_SNOW)
-					&& !cur.isReplaceable()
-					&& !cur.isIn(BlockTags.SMALL_FLOWERS)
-					&& !cur.isIn(BlockTags.TALL_FLOWERS)
+			} else if (!cur.is(BlockTags.LEAVES) && !cur.isAir()
+					&& !cur.is(Blocks.POWDER_SNOW)
+					&& !cur.canBeReplaced()
+					&& !cur.is(BlockTags.SMALL_FLOWERS)
+					&& !(cur.getBlock() instanceof TallFlowerBlock)
 					&& !(cur.getBlock() instanceof SweetBerryBushBlock)) {
-				return p.up();
+				return p.above();
 			}
 
 			prev = cur;
-			p = p.down();
+			p = p.below();
 		}
 
-		if (world.getBlockState(noLeaves).isOf(Blocks.POWDER_SNOW)) {
+		if (world.getBlockState(noLeaves).is(Blocks.POWDER_SNOW)) {
 			return null;
 		}
 		return noLeaves;
 	}
 
 	@Unique
-	private static boolean branchFallbackChance(World world, BlockPos pos) {
+	private static boolean branchFallbackChance(BlockPos pos) {
 		long hash = 0x9E3779B97F4A7C15L * pos.getX()
 				+ 0xBF58476D1CE4E5B9L * pos.getY()
 				+ 0x94D049BB133111EBL * pos.getZ();
@@ -217,54 +194,54 @@ public abstract class ServerWorldMixin {
 	}
 
 	@Unique
-	private static boolean isSnowStackFull(World world, BlockPos pos) {
+	private static boolean isSnowStackFull(Level world, BlockPos pos) {
 		BlockState state = world.getBlockState(pos);
-		if (!state.isOf(Blocks.SNOW)) {
+		if (!state.is(Blocks.SNOW)) {
 			return false;
 		}
 		int snowBlocks = countSnowBlocksBelow(world, pos);
 		int maxHeight = Math.max(1, MainConfig.getLayerDepth());
-		if (world.getBlockState(pos.down(snowBlocks + 1)).isIn(BlockTags.LEAVES)) {
+		if (world.getBlockState(pos.below(snowBlocks + 1)).is(BlockTags.LEAVES)) {
 			maxHeight = Math.min(maxHeight, MainConfig.getMaxLayersOnLeaves());
 		}
-		return state.get(SnowBlock.LAYERS) + snowBlocks * 8 >= maxHeight;
+		return state.getValue(SnowLayerBlock.LAYERS) + snowBlocks * 8 >= maxHeight;
 	}
 
 	@Unique
-	private static int countSnowBlocksBelow(World world, BlockPos pos) {
+	private static int countSnowBlocksBelow(Level world, BlockPos pos) {
 		int count = 0;
-		BlockPos p = pos.down();
-		while (world.getBlockState(p).isOf(Blocks.SNOW_BLOCK)) {
+		BlockPos p = pos.below();
+		while (world.getBlockState(p).is(Blocks.SNOW_BLOCK)) {
 			count++;
-			p = p.down();
+			p = p.below();
 		}
 		return count;
 	}
 
 	@Unique
-	private static boolean snowPossibleAtPosition(World world, BlockPos blockPos) {
-		BlockState belowState = world.getBlockState(blockPos.down());
+	private static boolean snowPossibleAtPosition(Level world, BlockPos blockPos) {
+		BlockState belowState = world.getBlockState(blockPos.below());
 		Block below = belowState.getBlock();
 		Block target = world.getBlockState(blockPos).getBlock();
 		if (isIce(below) || isIce(target)
-				|| below instanceof FluidBlock || target instanceof FluidBlock
-				|| (below instanceof DirtPathBlock && !MainConfig.isReplacePaths())
+				|| below instanceof LiquidBlock || target instanceof LiquidBlock
+				|| (below == Blocks.DIRT_PATH && !MainConfig.isReplacePaths())
 				|| below instanceof KelpBlock || below instanceof KelpPlantBlock
 				|| below instanceof SeagrassBlock || below instanceof TallSeagrassBlock
-				|| below instanceof StairsBlock
+				|| below instanceof StairBlock
 				|| below instanceof FenceBlock || below instanceof FenceGateBlock || below instanceof WallBlock
-				|| (below instanceof SlabBlock && belowState.get(SlabBlock.TYPE) == SlabType.BOTTOM)) {
+				|| (below instanceof SlabBlock && belowState.getValue(SlabBlock.TYPE) == SlabType.BOTTOM)) {
 			return false;
 		}
-		if (blockPos.getY() >= world.getBottomY() && blockPos.getY() < world.getTopY()) {
+		if (blockPos.getY() >= world.getMinY() && blockPos.getY() <= world.getMaxY()) {
 			BlockState blockstate = world.getBlockState(blockPos);
 			return (blockstate.getBlock() == Blocks.SNOW) ||
 					blockstate.isAir() ||
-					(((blockstate.isReplaceable() || blockstate.isIn(BlockTags.SMALL_FLOWERS)) && !blockstate.isAir()) && MainConfig.isShouldReplaceFlowersAndGrass()) ||
-					(blockstate.getBlock() instanceof MushroomPlantBlock && MainConfig.isReplaceSmallMushrooms()) ||
-					(blockstate.isIn(BlockTags.TALL_FLOWERS) && MainConfig.isReplaceTallFlowers()) ||
+					(((blockstate.canBeReplaced() || blockstate.is(BlockTags.SMALL_FLOWERS)) && !blockstate.isAir()) && MainConfig.isShouldReplaceFlowersAndGrass()) ||
+					(blockstate.getBlock() instanceof MushroomBlock && MainConfig.isReplaceSmallMushrooms()) ||
+					(blockstate.getBlock() instanceof TallFlowerBlock && MainConfig.isReplaceTallFlowers()) ||
 					(blockstate.getBlock() instanceof SweetBerryBushBlock && MainConfig.isReplaceBerryBushes()) ||
-					((blockstate.getBlock() instanceof CropBlock || blockstate.getBlock() instanceof StemBlock || blockstate.getBlock() instanceof SweetBerryBushBlock) && belowState.isOf(Blocks.FARMLAND) && MainConfig.isBreakCropsAndFarmland()) ||
+					((blockstate.getBlock() instanceof CropBlock || blockstate.getBlock() instanceof StemBlock || blockstate.getBlock() instanceof SweetBerryBushBlock) && belowState.is(Blocks.FARMLAND) && MainConfig.isBreakCropsAndFarmland()) ||
 					(blockstate.getBlock() instanceof TorchBlock && MainConfig.isReplaceTorches());
 		}
 		return false;
