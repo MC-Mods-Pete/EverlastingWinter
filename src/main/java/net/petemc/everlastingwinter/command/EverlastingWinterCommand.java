@@ -9,6 +9,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.petemc.everlastingwinter.EverlastingWinter;
 import net.petemc.everlastingwinter.config.MainConfig;
@@ -20,7 +21,7 @@ public class EverlastingWinterCommand {
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		LiteralArgumentBuilder<CommandSourceStack> root = LiteralArgumentBuilder.<CommandSourceStack>literal("everlastingwinter")
-				.requires(source -> source.hasPermission(2));
+				.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS));
 
 		root.then(LiteralArgumentBuilder.<CommandSourceStack>literal("status").executes(EverlastingWinterCommand::status));
 

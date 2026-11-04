@@ -34,7 +34,7 @@ public class ModBiomesModifiers {
                 return;
             }
             holder.unwrapKey().ifPresent(key -> {
-                boolean match = MainConfig.isSnowBiome(key.location());
+                boolean match = MainConfig.isSnowBiome(key.identifier());
                 if (match) {
                     ClimateSettingsBuilder climate = builder.getClimateSettings();
                     climate.setTemperature(MainConfig.getBiomeTemperature());

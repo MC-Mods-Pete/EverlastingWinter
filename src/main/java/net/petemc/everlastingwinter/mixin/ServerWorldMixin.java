@@ -15,7 +15,6 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.petemc.everlastingwinter.config.MainConfig;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -25,9 +24,6 @@ import java.util.function.BooleanSupplier;
 
 @Mixin(ServerLevel.class)
 public abstract class ServerWorldMixin {
-	@Shadow
-	public abstract void setWeatherParameters(int clearDuration, int rainDuration, boolean raining, boolean thundering);
-
 	@Unique
 	private boolean lastMainConfigValue = false;
 
@@ -37,17 +33,17 @@ public abstract class ServerWorldMixin {
 	// Runs once per world tick — keeps weather permanently in sync with the config.
 	@Inject(at = {@At("HEAD")}, method = {"tick"})
 	private void ewonTick(BooleanSupplier shouldKeepTicking, CallbackInfo info) {
+		ServerLevel serverLevel = (ServerLevel)(Object)this;
 		if (lastMainConfigValue != MainConfig.isConstantSnowfall()) {
 			lastMainConfigValue = MainConfig.isConstantSnowfall();
 			weatherTimer = 0;
 			if (!lastMainConfigValue) {
-				ServerLevel serverLevel = (ServerLevel)(Object)this;
-				this.setWeatherParameters(ServerLevel.RAIN_DELAY.sample(serverLevel.getRandom()), 0, false, false);
+				serverLevel.getServer().setWeatherParameters(ServerLevel.RAIN_DELAY.sample(serverLevel.getRandom()), 0, false, false);
 			}
 		}
 		if (lastMainConfigValue) {
 			if (weatherTimer <= 0) {
-				this.setWeatherParameters(0, 7000, true, false);
+				serverLevel.getServer().setWeatherParameters(0, 7000, true, false);
 				weatherTimer = 6000;
 			} else {
 				weatherTimer--;
@@ -74,7 +70,7 @@ public abstract class ServerWorldMixin {
 			Biome biome = world.getBiome(blockPos).value();
 			BlockState targetState = world.getBlockState(blockPos);
 			Block targetBlock = targetState.getBlock();
-			if ((world.isRaining() || MainConfig.isConstantSnowfall()) && biome.coldEnoughToSnow(blockPos)) {
+			if ((world.isRaining() || MainConfig.isConstantSnowfall()) && biome.coldEnoughToSnow(blockPos, world.getSeaLevel())) {
 				if (targetBlock == Blocks.POWDER_SNOW) {
 					if (MainConfig.isEnablePowderSnow()) {
 						BlockPos p = blockPos;
@@ -154,7 +150,7 @@ public abstract class ServerWorldMixin {
 		// within a short downward search and the branch has air above it.
 		BlockPos p = noLeaves;
 		BlockState prev = world.getBlockState(p.above());
-		for (int depth = 0; depth < 20 && p.getY() > world.getMinBuildHeight(); depth++) {
+		for (int depth = 0; depth < 20 && p.getY() > world.getMinY(); depth++) {
 			BlockState cur = world.getBlockState(p);
 
 			if (cur.is(BlockTags.LOGS)) {
@@ -165,7 +161,7 @@ public abstract class ServerWorldMixin {
 					&& !cur.is(Blocks.POWDER_SNOW)
 					&& !cur.canBeReplaced()
 					&& !cur.is(BlockTags.SMALL_FLOWERS)
-					&& !cur.is(BlockTags.TALL_FLOWERS)
+					&& !(cur.getBlock() instanceof TallFlowerBlock)
 					&& !(cur.getBlock() instanceof SweetBerryBushBlock)) {
 				return p.above();
 			}
@@ -229,7 +225,7 @@ public abstract class ServerWorldMixin {
 		Block target = world.getBlockState(blockPos).getBlock();
 		if (isIce(below) || isIce(target)
 				|| below instanceof LiquidBlock || target instanceof LiquidBlock
-				|| (below instanceof DirtPathBlock && !MainConfig.isReplacePaths())
+				|| (below == Blocks.DIRT_PATH && !MainConfig.isReplacePaths())
 				|| below instanceof KelpBlock || below instanceof KelpPlantBlock
 				|| below instanceof SeagrassBlock || below instanceof TallSeagrassBlock
 				|| below instanceof StairBlock
@@ -237,13 +233,13 @@ public abstract class ServerWorldMixin {
 				|| (below instanceof SlabBlock && belowState.getValue(SlabBlock.TYPE) == SlabType.BOTTOM)) {
 			return false;
 		}
-		if (blockPos.getY() >= world.getMinBuildHeight() && blockPos.getY() < world.getMaxBuildHeight()) {
+		if (blockPos.getY() >= world.getMinY() && blockPos.getY() <= world.getMaxY()) {
 			BlockState blockstate = world.getBlockState(blockPos);
 			return (blockstate.getBlock() == Blocks.SNOW) ||
 					blockstate.isAir() ||
 					(((blockstate.canBeReplaced() || blockstate.is(BlockTags.SMALL_FLOWERS)) && !blockstate.isAir()) && MainConfig.isShouldReplaceFlowersAndGrass()) ||
 					(blockstate.getBlock() instanceof MushroomBlock && MainConfig.isReplaceSmallMushrooms()) ||
-					(blockstate.is(BlockTags.TALL_FLOWERS) && MainConfig.isReplaceTallFlowers()) ||
+					(blockstate.getBlock() instanceof TallFlowerBlock && MainConfig.isReplaceTallFlowers()) ||
 					(blockstate.getBlock() instanceof SweetBerryBushBlock && MainConfig.isReplaceBerryBushes()) ||
 					((blockstate.getBlock() instanceof CropBlock || blockstate.getBlock() instanceof StemBlock || blockstate.getBlock() instanceof SweetBerryBushBlock) && belowState.is(Blocks.FARMLAND) && MainConfig.isBreakCropsAndFarmland()) ||
 					(blockstate.getBlock() instanceof TorchBlock && MainConfig.isReplaceTorches());

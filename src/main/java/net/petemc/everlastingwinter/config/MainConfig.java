@@ -1,6 +1,6 @@
 package net.petemc.everlastingwinter.config;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.Arrays;
@@ -216,7 +216,7 @@ public class MainConfig {
         return LIST_OF_SNOW_BIOMES.get();
     }
 
-    public static boolean isSnowBiome(ResourceLocation biomeId) {
+    public static boolean isSnowBiome(Identifier biomeId) {
         if (biomeId == null) {
             return false;
         }
@@ -224,7 +224,7 @@ public class MainConfig {
             if (rawBiomeId == null) {
                 continue;
             }
-            ResourceLocation configured = ResourceLocation.tryParse(rawBiomeId.trim().toLowerCase(Locale.ROOT));
+            Identifier configured = Identifier.tryParse(rawBiomeId.trim().toLowerCase(Locale.ROOT));
             if (configured != null && configured.equals(biomeId)) {
                 return true;
             }

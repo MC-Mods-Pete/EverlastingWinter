@@ -1,7 +1,8 @@
 plugins {
 	id 'java-library'
+	id 'idea'
 	id 'maven-publish'
-	id 'net.neoforged.moddev' version '1.0.21'
+	id 'net.neoforged.moddev' version '2.0.148'
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -32,17 +33,11 @@ base {
 	archivesName = mod_archives_name
 }
 
-// Mojang ships Java 21 to end users starting in 1.20.5, so mods should target Java 21.
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 neoForge {
 	// Specify the version of NeoForge to use.
 	version = project.neo_version
-
-	parchment {
-		mappingsVersion = project.parchment_mappings_version
-		minecraftVersion = project.parchment_minecraft_version
-	}
 
 	// This line is optional. Access Transformers are automatically detected
 	// accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
@@ -142,7 +137,6 @@ dependencies {
 	// http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
 	// http://www.gradle.org/docs/current/userguide/dependency_management.html
 
-	//runtimeOnly "curse.maven:jade-324717:${jade_version}"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
