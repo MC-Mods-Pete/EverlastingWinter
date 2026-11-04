@@ -2,6 +2,7 @@ package net.petemc.everlastingwinter.util;
 
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.level.biome.Biome;
 import net.neoforged.neoforge.common.world.BiomeModifier;
@@ -29,7 +30,7 @@ public class ModBiomesModifiers {
                 MapCodec.unit(EverlastingWinterBiomeModifier::new);
 
         @Override
-        public void modify(Holder<Biome> holder, Phase phase, ModifiableBiomeInfo.BiomeInfo.Builder builder) {
+        public void modify(RegistryAccess registries, Holder<Biome> holder, Phase phase, ModifiableBiomeInfo.BiomeInfo.Builder builder) {
             if (phase != Phase.MODIFY || !holder.is(BiomeTags.IS_OVERWORLD)) {
                 return;
             }

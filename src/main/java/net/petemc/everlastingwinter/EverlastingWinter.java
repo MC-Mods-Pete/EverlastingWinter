@@ -21,7 +21,7 @@ public class EverlastingWinter {
 	public EverlastingWinter(IEventBus modEventBus, ModContainer modContainer) {
 		LOGGER.info("Initializing the {} Mod", MOD_NAME);
 
-		modContainer.registerConfig(ModConfig.Type.SERVER, MainConfig.SPEC);
+		modContainer.registerConfig(ModConfig.Type.SYNCED, MainConfig.SPEC);
 		ModBiomesModifiers.MODIFIER_CODECS.register(modEventBus);
 
 		NeoForge.EVENT_BUS.addListener(EverlastingWinter::onRegisterCommands);
