@@ -237,6 +237,14 @@ public abstract class ServerWorldMixin {
 				|| (below instanceof SlabBlock && belowState.getValue(SlabBlock.TYPE) == SlabType.BOTTOM)) {
 			return false;
 		}
+		// Only place snow where a vanilla snow layer could survive (needs a full top face,
+		// so no snow on iron bars, glass panes, chains, lanterns etc.).
+		// Farmland and dirt paths count as ground when they get turned into dirt before the snow is placed.
+		boolean groundGetsConverted = (belowState.is(Blocks.FARMLAND) && MainConfig.isBreakCropsAndFarmland())
+				|| (belowState.is(Blocks.DIRT_PATH) && MainConfig.isReplacePaths());
+		if (!groundGetsConverted && !Blocks.SNOW.defaultBlockState().canSurvive(world, blockPos)) {
+			return false;
+		}
 		if (blockPos.getY() >= world.getMinBuildHeight() && blockPos.getY() < world.getMaxBuildHeight()) {
 			BlockState blockstate = world.getBlockState(blockPos);
 			return (blockstate.getBlock() == Blocks.SNOW) ||
