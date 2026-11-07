@@ -1,0 +1,9 @@
+EverlastingWinter Changelog
+===========================
+
+1.1.1-NeoForge-mc1.21.1
+-----------------------
+Fixes
+ - Snow no longer piles up on iron bars, glass panes, chains, lanterns and other blocks without a full top surface
+Changes
+ - With breakCropsAndFarmland turned off, snow no longer settles on empty farmland
