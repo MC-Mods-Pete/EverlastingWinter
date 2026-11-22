@@ -1,6 +1,11 @@
 EverlastingWinter Changelog
 ===========================
 
+1.1.2-Fabric-mc1.21.1
+---------------------
+Fixes
+ - Endermen no longer act as if they were standing in rain in the End, the Nether and dry biomes like deserts while constantSnowfall is on, so they stop taking damage and teleporting around nonstop
+
 1.1.1-Fabric-mc1.21.1
 ---------------------
 Fixes
