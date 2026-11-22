@@ -2,6 +2,7 @@ package net.petemc.everlastingwinter.mixin;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import net.petemc.everlastingwinter.config.MainConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,8 +24,11 @@ public abstract class WorldMixin {
 	@Inject(method = "isRainingAt", at = @At("RETURN"), cancellable = true)
 	private void onHasRain(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
 		if (MainConfig.isConstantSnowfall() && !cir.getReturnValue()) {
-			// Only protect when sky is visible — same rule as real rain
-			if (((Level)(Object)this).canSeeSky(pos)) {
+			Level world = (Level)(Object)this;
+			// Only protect when sky is visible — same rule as real rain.
+			// Skip biomes without precipitation (End, Nether, deserts, ...),
+			// otherwise endermen there take rain damage and keep teleporting.
+			if (world.canSeeSky(pos) && world.getBiome(pos).value().getPrecipitation() != Biome.Precipitation.NONE) {
 				cir.setReturnValue(true);
 			}
 		}
