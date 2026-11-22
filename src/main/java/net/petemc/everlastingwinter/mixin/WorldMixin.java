@@ -23,8 +23,11 @@ public abstract class WorldMixin {
 	@Inject(method = "isRainingAt", at = @At("RETURN"), cancellable = true)
 	private void onHasRain(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
 		if (MainConfig.isConstantSnowfall() && !cir.getReturnValue()) {
-			// Only protect when sky is visible — same rule as real rain
-			if (((Level)(Object)this).canSeeSky(pos)) {
+			Level world = (Level)(Object)this;
+			// Only protect when sky is visible — same rule as real rain.
+			// Skip biomes without precipitation (End, Nether, deserts, ...),
+			// otherwise endermen there take rain damage and keep teleporting.
+			if (world.canSeeSky(pos) && world.getBiome(pos).value().hasPrecipitation()) {
 				cir.setReturnValue(true);
 			}
 		}
