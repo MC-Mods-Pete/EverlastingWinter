@@ -1,6 +1,5 @@
 package net.petemc.everlastingwinter.mixin;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.petemc.everlastingwinter.config.MainConfig;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,19 +16,7 @@ public abstract class WorldMixin {
 		}
 	}
 
-	// hasRain() checks sky visibility and biome in addition to isRaining(),
-	// which can still return false under tree canopies etc.
-	// Override it directly so undead mobs are protected in all open areas.
-	@Inject(method = "isRainingAt", at = @At("RETURN"), cancellable = true)
-	private void onHasRain(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-		if (MainConfig.isConstantSnowfall() && !cir.getReturnValue()) {
-			Level world = (Level)(Object)this;
-			// Only protect when sky is visible — same rule as real rain.
-			// Skip biomes without precipitation (End, Nether, deserts, ...),
-			// otherwise endermen there take rain damage and keep teleporting.
-			if (world.canSeeSky(pos) && world.getBiome(pos).value().hasPrecipitation()) {
-				cir.setReturnValue(true);
-			}
-		}
-	}
+	// isRainingAt() is intentionally not overridden: in snowy biomes vanilla returns
+	// false there, so snow golems, endermen and other water-sensitive mobs don't take
+	// rain damage. Undead sunlight protection is handled in MobMixin instead.
 }
