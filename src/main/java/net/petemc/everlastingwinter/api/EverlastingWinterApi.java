@@ -1,5 +1,6 @@
 package net.petemc.everlastingwinter.api;
 
+import net.petemc.everlastingwinter.config.MainConfig;
 import net.petemc.everlastingwinter.config.RuntimeOverrides;
 
 import java.util.Collection;
@@ -11,7 +12,9 @@ import java.util.Collection;
  * lost when the game exits.
  *
  * <p>This API does not cover {@code biomeTemperature} (only applies at server
- * start) or {@code listOfSnowBiomes} (read-only, edit via the config file).</p>
+ * start) or {@code listOfSnowBiomes} (read-only, edit via the config file).
+ * {@code frostedLeaves} and {@code frostedLeavesColor} also only apply at server
+ * start, so they can be read here but not set.</p>
  */
 public class EverlastingWinterApi {
 
@@ -179,5 +182,18 @@ public class EverlastingWinterApi {
 
 	public static void setPowderSnowChance(int value) {
 		RuntimeOverrides.set("powderSnowChance", String.valueOf(Math.max(0, Math.min(100, value))));
+	}
+
+	// --- frostedLeaves (read-only, applies at server start) ---
+
+	public static boolean isFrostedLeaves() {
+		return MainConfig.isFrostedLeaves();
+	}
+
+	// --- frostedLeavesColor (read-only, applies at server start) ---
+
+	/** The leaf color of the listed biomes as RGB value (e.g. 0xA8C4A0). */
+	public static int getFrostedLeavesColor() {
+		return MainConfig.getFrostedLeavesColor();
 	}
 }

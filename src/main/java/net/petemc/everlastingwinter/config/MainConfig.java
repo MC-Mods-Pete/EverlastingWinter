@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Locale;
 
 public class MainConfig {
+    public static final String DEFAULT_FROSTED_LEAVES_COLOR = "#A8C4A0";
+    private static final int DEFAULT_FROSTED_LEAVES_COLOR_RGB = 0xA8C4A0;
+
     private static final List<String> DEFAULT_SNOW_BIOMES = Arrays.asList(
             "minecraft:stony_shore",
             "minecraft:windswept_forest",
@@ -62,6 +65,8 @@ public class MainConfig {
     private static final ModConfigSpec.ConfigValue<Boolean> REPLACE_TALL_FLOWERS;
     private static final ModConfigSpec.ConfigValue<Boolean> REPLACE_BERRY_BUSHES;
     private static final ModConfigSpec.ConfigValue<Double> BIOME_TEMPERATURE;
+    private static final ModConfigSpec.ConfigValue<Boolean> FROSTED_LEAVES;
+    private static final ModConfigSpec.ConfigValue<String> FROSTED_LEAVES_COLOR;
     private static final ModConfigSpec.ConfigValue<Boolean> BREAK_CROPS_AND_FARMLAND;
     private static final ModConfigSpec.ConfigValue<Boolean> REPLACE_PATHS;
     private static final ModConfigSpec.ConfigValue<Boolean> REPLACE_TORCHES;
@@ -107,6 +112,14 @@ public class MainConfig {
         BIOME_TEMPERATURE = BUILDER
                 .comment("The temperature of the biome | default: -1.0")
                 .defineInRange("biomeTemperature", -1.0, -2.0, 2.0);
+
+        FROSTED_LEAVES = BUILDER
+                .comment("If true, leaves in the listed biomes get a frosted tint (frostedLeavesColor). If false, they keep their vanilla color. Applies at server start | default: true")
+                .define("frostedLeaves", true);
+
+        FROSTED_LEAVES_COLOR = BUILDER
+                .comment("Leaf color in the listed biomes as hex code #RRGGBB, used if frostedLeaves is true. Applies at server start | default: #A8C4A0")
+                .define("frostedLeavesColor", DEFAULT_FROSTED_LEAVES_COLOR, o -> o instanceof String s && parseColor(s) != null);
 
         BREAK_CROPS_AND_FARMLAND = BUILDER
                 .comment("If true, crops are removed and farmland is turned into dirt so snow can accumulate | default: true")
@@ -210,6 +223,30 @@ public class MainConfig {
 
     public static float getBiomeTemperature() {
         return BIOME_TEMPERATURE.get().floatValue();
+    }
+
+    public static boolean isFrostedLeaves() {
+        return FROSTED_LEAVES.get();
+    }
+
+    public static int getFrostedLeavesColor() {
+        Integer color = parseColor(FROSTED_LEAVES_COLOR.get());
+        return color != null ? color : DEFAULT_FROSTED_LEAVES_COLOR_RGB;
+    }
+
+    /** Parses a hex color like "#A8C4A0" (the '#' is optional), returns null if invalid. */
+    public static Integer parseColor(String value) {
+        if (value == null) {
+            return null;
+        }
+        String hex = value.trim();
+        if (hex.startsWith("#")) {
+            hex = hex.substring(1);
+        }
+        if (hex.length() != 6 || !hex.chars().allMatch(c -> Character.digit(c, 16) >= 0)) {
+            return null;
+        }
+        return Integer.parseInt(hex, 16);
     }
 
     public static List<? extends String> getListOfSnowBiomes() {
