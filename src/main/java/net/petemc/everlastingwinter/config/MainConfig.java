@@ -10,6 +10,10 @@ import net.petemc.everlastingwinter.EverlastingWinter;
 
 @Config(name = EverlastingWinter.MOD_ID)
 public class MainConfig implements ConfigData {
+    @ConfigEntry.Gui.Excluded
+    public static final String DEFAULT_FROSTED_LEAVES_COLOR = "#A8C4A0";
+    @ConfigEntry.Gui.Excluded
+    private static final int DEFAULT_FROSTED_LEAVES_COLOR_RGB = 0xA8C4A0;
 
     public static boolean isConstantSnowfall() {
         Boolean o = RuntimeOverrides.getBoolean("constantSnowfall");
@@ -78,6 +82,30 @@ public class MainConfig implements ConfigData {
 
     public static float getBiomeTemperature() {
         return INSTANCE.biomeTemperature;
+    }
+
+    public static boolean isFrostedLeaves() {
+        return INSTANCE.frostedLeaves;
+    }
+
+    public static int getFrostedLeavesColor() {
+        Integer color = parseColor(INSTANCE.frostedLeavesColor);
+        return color != null ? color : DEFAULT_FROSTED_LEAVES_COLOR_RGB;
+    }
+
+    /** Parses a hex color like "#A8C4A0" (the '#' is optional), returns null if invalid. */
+    public static Integer parseColor(String value) {
+        if (value == null) {
+            return null;
+        }
+        String hex = value.trim();
+        if (hex.startsWith("#")) {
+            hex = hex.substring(1);
+        }
+        if (hex.length() != 6 || !hex.chars().allMatch(c -> Character.digit(c, 16) >= 0)) {
+            return null;
+        }
+        return Integer.parseInt(hex, 16);
     }
 
     static boolean rawConstantSnowfall() {
@@ -151,6 +179,9 @@ public class MainConfig implements ConfigData {
         snowTickChance = Math.max(0, Math.min(100, snowTickChance));
         powderSnowChance = Math.max(0, Math.min(100, powderSnowChance));
         biomeTemperature = Math.max(-2.0f, Math.min(2.0f, biomeTemperature));
+        if (parseColor(frostedLeavesColor) == null) {
+            frostedLeavesColor = DEFAULT_FROSTED_LEAVES_COLOR;
+        }
     }
 
     @ConfigEntry.Gui.Tooltip()
@@ -188,6 +219,14 @@ public class MainConfig implements ConfigData {
     @ConfigEntry.Gui.Tooltip()
     @Comment("The temperature of the biome | default: -1.0")
     private float biomeTemperature = -1.0f;
+
+    @ConfigEntry.Gui.Tooltip()
+    @Comment("If true, leaves in the listed biomes get a frosted tint (frostedLeavesColor). If false, they keep their vanilla color. Applies at server start | default: true")
+    private boolean frostedLeaves = true;
+
+    @ConfigEntry.Gui.Tooltip()
+    @Comment("Leaf color in the listed biomes as hex code #RRGGBB, used if frostedLeaves is true. Applies at server start | default: #A8C4A0")
+    private String frostedLeavesColor = DEFAULT_FROSTED_LEAVES_COLOR;
 
     @ConfigEntry.Gui.Tooltip()
     @Comment("If true, crops are removed and farmland is turned into dirt so snow can accumulate | default: true")
