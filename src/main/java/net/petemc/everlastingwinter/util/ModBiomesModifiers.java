@@ -40,7 +40,9 @@ public class ModBiomesModifiers {
                     climate.setTemperature(MainConfig.getBiomeTemperature());
                     climate.setTemperatureModifier(Biome.TemperatureModifier.NONE);
                     climate.setPrecipitation(Biome.Precipitation.SNOW);
-                    builder.getSpecialEffects().foliageColorOverride(0xDFDFDF);
+                    if (MainConfig.isFrostedLeaves()) {
+                        builder.getSpecialEffects().foliageColorOverride(MainConfig.getFrostedLeavesColor());
+                    }
                 }
             });
         }
