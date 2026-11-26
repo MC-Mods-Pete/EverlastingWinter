@@ -20,7 +20,9 @@ public class ModBiomesModifiers {
                             context.getWeather().setPrecipitation(true);
                             context.getWeather().setTemperature(MainConfig.getBiomeTemperature());
                             context.getWeather().setTemperatureModifier(Biome.TemperatureModifier.NONE);
-                            context.getEffects().setFoliageColorOverride(0xdfdfdf);
+                            if (MainConfig.isFrostedLeaves()) {
+                                context.getEffects().setFoliageColorOverride(MainConfig.getFrostedLeavesColor());
+                            }
                         });
     }
 
