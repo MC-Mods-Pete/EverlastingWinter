@@ -6,7 +6,8 @@
 	"mixins": [
 		"ServerWorldMixin",
 		"WorldMixin",
-		"MobMixin"
+		"MobMixin",
+		"SnowGolemMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
