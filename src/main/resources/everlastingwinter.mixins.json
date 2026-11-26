@@ -6,7 +6,8 @@
 	"refmap": "everlastingwinter.mixins-refmap.json",
 	"mixins": [
 		"ServerWorldMixin",
-		"WorldMixin"
+		"WorldMixin",
+		"MobMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
