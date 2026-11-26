@@ -1,6 +1,18 @@
 EverlastingWinter Changelog
 ===========================
 
+1.2.0-NeoForge-mc1.21.1
+-----------------------
+New
+ - Leaves in the snow biomes now get a pale, frosty green tint instead of a flat grey
+ - New config option frostedLeavesColor to pick your own leaf tint as hex code (#RRGGBB)
+ - New config option frostedLeaves to turn the leaf tint off and keep the vanilla leaf colors. Both leaf options take effect when the world or server starts
+Fixes
+ - Snow golems, endermen and other mobs that are hurt by water (also from other mods) no longer drown under the open sky while it snows
+ - Snow golems no longer melt in snowy deserts, savannas and badlands
+Changes
+ - Snowfall no longer counts as rain, so the trident's Riptide enchantment only works in real rain, like in vanilla
+
 1.1.2-NeoForge-mc1.21.1
 -----------------------
 Fixes
